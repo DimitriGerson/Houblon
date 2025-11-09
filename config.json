@@ -1,0 +1,13 @@
+{
+  "mode": "STA",
+  "ap": {
+    "ssid": "ESP32_AP",
+    "password": "12345678",
+    "channel": 6,
+    "hidden": false
+  },
+  "sta": {
+    "ssid": "MonResauWifi",
+    "password": "MotDePasseWifi"
+  }
+}
