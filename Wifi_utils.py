@@ -1,8 +1,10 @@
 # Wifi_utils.py
 # Fonction utilitaires Wi-Fi (AP / STA)
 
-
-import network
+try:
+    import network
+except ImportError:
+    import network_mock as network #pour tests locaux 
 import time
 import boot
 
