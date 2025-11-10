@@ -14,7 +14,7 @@ cfg_sta = {
 
 def test_disable_all_wifi():
     wifi_utils.disable_all_wifi()
-    " Pas d'erreur = succès
+    # Pas d'erreur = succès
     assert True
 
 def test_start_ap_returns_wlan():
