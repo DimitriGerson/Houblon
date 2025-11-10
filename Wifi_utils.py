@@ -48,3 +48,6 @@ def start_sta(cfg):
     boot.log("Echec connexion STA.")
     sta.active(False)
     return None
+# --- Optionnel : petit log pour savoir sur quoi on tourne ---
+if not _ESP_MODE:
+    boot.log("Mode simulation réseau activé (network_mock).")
