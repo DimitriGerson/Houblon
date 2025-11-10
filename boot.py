@@ -3,6 +3,13 @@
 
 import time, os, json
 
+try:
+    from time import ticks_ms
+except ImportError:
+    # fallback pour tests PC
+    import time
+    ticks_ms = lambda: int(time.time() * 1000)
+
 LOG_FILE = "boot.log"
 
 def log(msg):
