@@ -1,0 +1,9 @@
+Le but est de réaliser une sonde qui va prendre des mesures sur un houblon à fin
+de récupérer des information sur la vie du houblon sauvage
+température
+humidité
+température du sol
+éclairement
+la sonde devra être suffisamment solide pour fonctionner en extérieur.
+elle ne sera pas relié au réseau dans un premier temps
+je viendrais me connecter à la sonde.
