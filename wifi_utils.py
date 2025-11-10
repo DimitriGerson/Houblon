@@ -7,8 +7,8 @@ import boot
 try:
     import network  # vrai module sur ESP32
     _ESP_MODE = True
-except ImportError
-    import network_mock as nework # version simulée pour PC
+except ImportError:
+    import network_mock as network # version simulée pour PC
     _ESP_MODE = False
 
 def disable_all_wifi():
