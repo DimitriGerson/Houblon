@@ -1,16 +1,19 @@
 # Wifi_utils.py
-# Fonction utilitaires Wi-Fi (AP / STA)
-
-try:
-    import network
-except ImportError:
-    import network_mock as network #pour tests locaux 
+# Fonction utilitaires Wi-Fi (AP / STA) 
 import time
 import boot
 
+# --- Détection automatique : ESP32 ou simulation PC ---
+try:
+    import network  # vrai module sur ESP32
+    _ESP_MODE = True
+except ImportError
+    import network_mock as nework # version simulée pour PC
+    _ESP_MODE = False
+
 def disable_all_wifi():
     """Désactive tous les modes Wi-Fi actifs."""
-    for iface in [network.WLAN(network.STA_IF), network.WLAN(netmork.AP_IF)]:
+    for iface in [network.WLAN(network.STA_IF), network.WLAN(network.AP_IF)]:
         if iface.active():
             iface.active(False)
     boot.log("Tous les modes Wi-Fi désactivés.")
@@ -29,7 +32,7 @@ def start_ap(cfg):
     )
     for _ in range(10):
         if ap.active():
-            bootµ.log(f"AP actif - SSID: {cfg['ssid']} - IP: {ap.ifconfig()[0]}")
+            boot.log(f"AP actif - SSID: {cfg['ssid']} - IP: {ap.ifconfig()[0]}")
             return ap
         time.sleep(0.5)
     boot.log("Echec de l'activation du point d'accès.")
