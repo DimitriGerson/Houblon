@@ -5,5 +5,16 @@ humidité
 température du sol
 éclairement
 la sonde devra être suffisamment solide pour fonctionner en extérieur.
-elle ne sera pas relié au réseau dans un premier temps
+elle ne sera pas reliée au réseau dans un premier temps
 je viendrais me connecter à la sonde.
+J'ai réalisé l'ensemble des fichiers boot main about_esp wifi_utils ainsi qu'un mock de
+network pour pouvoir tout tester.
+Les tests sont passé cela fonctionne.
+pour faire passer les tests il suffit de se mettre dans le répertoire courant
+et de taper
+pytest -v
+maintenant je dois faire un mini serveur sur le esp et pouvoir aller dessus
+c'est la prochaine étape 
+j'ai un fichier config.json qui me permet de choisir ma config sans passer par le code.
+je dois maintenant tester cela en vrai
+faire un mini serveur et modifier la config

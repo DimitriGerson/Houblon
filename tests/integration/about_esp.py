@@ -11,6 +11,9 @@ Utilisasion :
 ou
 	import about_esp
 	about_esp.about_esp() 	# exécution manuelle
+Pour les tests 
+        import about_esp
+        about_esp.test_about_esp()
 """
 
 import network
@@ -123,7 +126,7 @@ def test_about_esp():
     try:
         about_esp()
         passed += 1
-        print("[KO] about_esp() exécuté")
+        print("[OK] about_esp() exécuté")
     except Exception as e:
         failed += 1
         print("[KO] about_esp() :", e)

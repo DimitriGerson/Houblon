@@ -1,11 +1,12 @@
-import os
+import sys,os
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 import json
 import boot
 
 def setup_function():
     # Nettoyage avant chaque test
     for f in ["boot.log", "config.json"]:
-        if f in os.listdir():
+        if f in os.listdir() and os.getcwd().endswith("tests"):
             os.remove(f)
 
 def test_load_config_default():
@@ -33,3 +34,26 @@ def test_clear_old_log_removes_large_file():
         f.write(b"x" * 101_000)
     boot.clear_old_log()
     assert not os.path.exists("boot.log")
+
+def test_load_config_missing_file():
+    # On s'assure que le fichier n'existe pas
+    if os.path.exists("config.json"):
+        os.remove("config.json")
+    
+    cfg = boot.load_config()
+    assert cfg["mode"] == "AP"
+    assert "ap" in cfg
+
+def test_loa_config_invalid_json():
+    with open("config.json", "w") as f:
+        f.write("{invalid_json: true") # pas de guillements ni accolade fermante
+
+    cfg = boot.load_config()
+    assert cfg["mode"] == "AP"
+
+from unittest.mock import patch
+
+def test_load_config_raises_oserror():
+    with patch("builtins.open", side_effect=OSError("Permission denied")):
+        cfg = boot.load_config()
+        assert cfg["mode"] == "AP"

@@ -1,0 +1,6 @@
+# .coveragerc
+[run]
+omit =
+    src/ampy-test.py 
+    src/network_mock.py
+    test/*

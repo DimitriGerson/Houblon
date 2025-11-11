@@ -1,3 +1,5 @@
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 import wifi_utils
 
 cfg_ap = {
