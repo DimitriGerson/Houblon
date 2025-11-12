@@ -1,9 +1,0 @@
-[1762892066.28] Erreur lecture config.json : [Errno 2] No such file or directory: 'config.json' 
-[1762892066.29] Erreur lecture config.json : Expecting property name enclosed in double quotes: line 1 column 2 (char 1) 
-[1762892066.31] Tous les modes Wi-Fi désactivés. 
-[1762892066.36] Tous les modes Wi-Fi désactivés. 
-[1762892066.36] AP actif - SSID: TestAP - IP: 192.168.4.1 
-[1762892066.37] Tous les modes Wi-Fi désactivés. 
-[1762892066.38]  Connecté à HomeWifi - IP: 192.168.4.1 
-[1762892066.39] Tous les modes Wi-Fi désactivés. 
-[1762892076.41] Echec connexion STA. 

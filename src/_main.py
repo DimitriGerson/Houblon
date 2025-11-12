@@ -2,19 +2,16 @@
 # Choisit le mode réseau selon confg.json et lance le programme principal
 
 import boot
-import wifi_utils
+import Wifi_utils
 import time
-from network_setup import start_server, start_server
 
 cfg = boot.load_config()
 mode = cfg.get("mode","AP").upper()
 
 boot.log(f"Démarrage en mode : {mode}")
-net, mode2 = setup_network()
 
 if mode == "AP":
     wifi_utils.start_ap(cfg["ap"])
-    start_server(net,mode2)
 elif mode == "STA":
     sta = wifi_utils.start_sta(cfg["sta"])
     if not sta:
