@@ -12,14 +12,17 @@ def safe_restart():
     time.sleep(5)
     machine.reset()
 
+# === Chargement de la configuration ===
 cfg = boot.load_config()
 mode = cfg.get("mode","AP").upper()
 
 boot.log(f"Démarrage en mode : {mode}")
 
+# === Démarrage selon le mode ===
 if mode == "AP":
     ap = wifi_utils.start_ap(cfg["ap"])
     if ap:
+        boot.log("Point d'accès actif, lancement du server web...")
         start_server(ap, mode)
     else:
         boot.log("Impossible de démarrer le Wifi AP. Redémarrage...")
@@ -31,19 +34,13 @@ elif mode == "STA":
         boot.log("Connexion STA échouée - bascule en AP")
         ap = wifi_utils.start_ap(cfg["ap"])
         if ap:
-            start_server(ap, "AP")
+            start_server(ap, "AP") # fallback en AP
         else:
             safe_restart()
     else:
         boot.log("Connexion STA réussie.")
+        boot.log("Lancement du serveur web...")
+        start_server(sta, "STA") # ici aussi, lancement du serveur
 else:
     boot.log(f"Mode inconnu : {mode}")
     safe_restart()
-
-boot.log("Configuration réseau terminée.")
-boot.log("Programme principal en cours...")
-
-# === Exemple de boucle principale ===
-while True:
-    time.sleep(5)
-    boot.log("ESP32 actif...")

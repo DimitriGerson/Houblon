@@ -1,53 +1,13 @@
-import network, socket, os, time, json
-
-CONFIG_FILE = "config.json"
-
-def load_config():
-    try:
-        with open(CONFIG_FILE, "r") as f:
-            return json.load(f)
-    except (OSError, ValueError):
-        print("Erreur lecture config.json")
-        return {}
-
-def setup_network():
-    config = load_config()
-    mode = config.get("mode", "AP").upper()
-
-    if mode == "AP":
-        ap_cfg = config.get("ap", {})
-        ap = network.WLAN(network.AP_IF)
-        ap.active(True)
-        ap.config(
-            essid=ap_cfg.get("ssid", "ESP32_AP"),
-            password=ap_cfg.get("password", "12345678"),
-            channel=ap_cfg.get("channel", 6),
-            hidden=ap_cfg.get("hidden", False)
-        )
-        while not ap.active():
-            pass
-        print("AP actif :", ap.ifconfig())
-        return ap, "AP"
-
-    elif mode == "STA":
-        sta_cfg = config.get("sta", {})
-        sta = network.WLAN(network.STA_IF)
-        sta.active(True)
-        if sta_cfg.get("ssid") and sta_cfg.get("password"):
-            sta.connect(sta_cfg["ssid"], sta_cfg["password"])
-            while not sta.isconnected():
-                print("Connexion au Wi-Fi…")
-                time.sleep(1)
-            print("STA connecté :", sta.ifconfig())
-            return sta, "STA"
-        else:
-            print("STA sans SSID, fallback AP")
-            return setup_network()
+import socket, os, time
 
 def start_server(net, mode, timeout=300):
     addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
     s = socket.socket()
-    s.bind(addr)
+    try:
+        s.bind(addr)
+    except OSerror as e:
+        print("Erreur lors du bind sur le port 80:", e)
+        return
     s.listen(1)
     s.settimeout(1)
     print("Serveur web actif sur port 80")
@@ -59,6 +19,7 @@ def start_server(net, mode, timeout=300):
         if time.time() - last_activity > timeout:
             print("Aucune activité, arrêt du serveur.")
             s.close()
+            print("Serveur arrété après inactivité.")
             break
 
         try:
@@ -143,6 +104,6 @@ def start_server(net, mode, timeout=300):
         </html>
         """
 
-        response = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" + html
+        response = "HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + html
         cl.send(response)
         cl.close()
