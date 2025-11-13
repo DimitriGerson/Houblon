@@ -2,8 +2,7 @@
   "mode": "AP",
   "ap": {
     "ssid": "ESP32_AP",
-    "password": "12345678",
-    "channel": 6,
+    "password": "12345678"
     "hidden": false
   },
   "sta": {

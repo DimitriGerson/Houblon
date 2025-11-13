@@ -15,7 +15,7 @@ CONFIG_FILE = "config.json"
 def log(msg):
     """Affiche et écrit un message dans boot.log."""
     t = ticks_ms() / 1000
-    line = f"[{t:07.2f}] {msg} \n"
+    line = "[{:.2f}] ".format(t) + msg + "\n"
     print(line, end="")
     try:
         with open(LOG_FILE, "a") as f:
@@ -41,7 +41,7 @@ def load_config():
             log("Configuration chargée.")
             return cfg
     except Exception as e:
-        log(f"Erreur lecture config.json : {e}")
+        log("Erreur lecture config.json : " + str(e) )
         return {
             "mode": "AP",
             "ap": {"ssid": "ESP32_AP", "password": "12345678", "channel": 6, "hidden":False},

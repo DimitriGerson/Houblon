@@ -1,0 +1,25 @@
+Liste de commandes pour tester:
+pour savoir si un server tourne sur un port
+sudo lsof -i :8081
+s'il y a des PID a tuer
+sudo kill -9 numeroDuPid
+ou en une seule ligne
+sudo fuser -k 8081/tcp
+
+Pour essayer de compiler un script python
+python -m pycompile nomdufichier.py
+
+Commande git
+git add . pour ajouter les modification
+git commit -m "le message" pour ajouter un commit
+
+Commande pytest
+pytest -v nomdufichiertest.py
+on peut aussi créer un pytest.ini dans lequel on va choisir l'ensemble des dossiers
+et des fichiers à tester
+
+Pour les tests:
+-important de créer des mock d'objet pour pouvoir les utiliser dans les tests.
+-pour créer des fonction utiliser lambda ainsi la variable est bien une fonction et
+pas une variable
+-couvrir 80% des tests est raisonable au-dessus c'est beaucoup de temps.

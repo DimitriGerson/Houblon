@@ -16,7 +16,7 @@ def safe_restart():
 cfg = boot.load_config()
 mode = cfg.get("mode","AP").upper()
 
-boot.log(f"Démarrage en mode : {mode}")
+boot.log("Démarrage en mode : " + mode )
 
 # === Démarrage selon le mode ===
 if mode == "AP":
@@ -42,5 +42,5 @@ elif mode == "STA":
         boot.log("Lancement du serveur web...")
         start_server(sta, "STA") # ici aussi, lancement du serveur
 else:
-    boot.log(f"Mode inconnu : {mode}")
+    boot.log("Mode inconnu : " + mode)
     safe_restart()

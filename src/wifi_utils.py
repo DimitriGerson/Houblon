@@ -32,7 +32,7 @@ def start_ap(cfg):
     )
     for _ in range(10):
         if ap.active():
-            boot.log(f"AP actif - SSID: {cfg['ssid']} - IP: {ap.ifconfig()[0]}")
+            boot.log("AP actif - SSID: " + cfg['ssid'] +" - IP: " + ap.ifconfig()[0])
             return ap
         time.sleep(0.5)
     boot.log("Echec de l'activation du point d'accès.")
@@ -45,7 +45,7 @@ def start_sta(cfg):
     sta.connect(cfg["ssid"], cfg["password"])
     for _ in range (20):
         if sta.isconnected():
-            boot.log(f" Connecté à {cfg['ssid']} - IP: {sta.ifconfig()[0]}")
+            boot.log(" Connecté à " + cfg['ssid'] + " - IP: " + sta.ifconfig()[0])
             return sta
         time.sleep(0.5)
     boot.log("Echec connexion STA.")

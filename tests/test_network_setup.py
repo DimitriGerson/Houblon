@@ -3,6 +3,7 @@ import socket
 import threading
 import time
 import os
+import threading
 
 import network_setup  # ton fichier à tester
 
@@ -30,43 +31,55 @@ class TestStartServer(unittest.TestCase):
         net = MockNetwork()
 
         # Lance le serveur dans un thread séparé
+        stop_event = threading.Event()
         server_thread = threading.Thread(
             target=network_setup.start_server,
-            args=(net, "AP", 5),
+            args=(net, "AP", 10, 8081, stop_event),
             daemon=True
         )
         server_thread.start()
-        time.sleep(1)  # laisse le temps au serveur de démarrer
-
+        for _ in range(20):
+            try:
+                s = socket.socket()
+                s.connect(("127.0.0.1", 8081))
+                s.close()
+                break # le serveur est prêt
+            except ConnectionRefusedError:
+                time.sleep(0.5)  # laisse le temps au serveur de démarrer
+        else:
+            raise RuntimeError("Le server ne s'est pas lancé à temps")
         # Se connecte au serveur
         s = socket.socket()
-        s.connect(("127.0.0.1", 80))
+        s.connect(("127.0.0.1", 8081))
         s.send(b"GET / HTTP/1.0\r\n\r\n")
         data = s.recv(4096).decode()
         s.close()
-
+        # après la requete HTTP
+        stop_event.set() #après la requête HTTP
+        server_thread.join()
         self.assertIn("ESP32 (AP)", data)
         self.assertIn("Fichiers disponibles", data)
 
     def test_server_download_json(self):
         """Le serveur doit renvoyer le contenu du fichier JSON demandé"""
         net = MockNetwork()
-
+        stop_event = threading.Event()
         # Lance le serveur dans un thread séparé
         server_thread = threading.Thread(
             target=network_setup.start_server,
-            args=(net, "AP", 5),
+            args=(net, "AP", 10,8081, stop_event),
             daemon=True
         )
         server_thread.start()
-        time.sleep(1)
+        time.sleep(0.5)
 
         s = socket.socket()
-        s.connect(("127.0.0.1", 80))
+        s.connect(("127.0.0.1", 8081))
         s.send(b"GET /download?file=test.json HTTP/1.0\r\n\r\n")
         data = s.recv(4096).decode()
         s.close()
-
+        stop_event.set()
+        server_thread.join()
         self.assertIn('"test": "ok"', data)
 
     def test_server_timeout(self):

@@ -18,7 +18,7 @@ c'est la prochaine étape
 j'ai un fichier config.json qui me permet de choisir ma config sans passer par le code.
 je dois maintenant tester cela en vrai
 faire un mini serveur et modifier la config
-J'ai tester mon serveur en test unitaire maintenant je dois exporter l'ensemble des fichiers
+13/11/2025J'ai tester mon serveur en test unitaire maintenant je dois exporter l'ensemble des fichiers
 -boot.py
 -main.py
 -wifi_utils.py
