@@ -1,9 +1,9 @@
 Le but est de réaliser une sonde qui va prendre des mesures sur un houblon à fin
 de récupérer des information sur la vie du houblon sauvage
-température
-humidité
-température du sol
-éclairement
+-température
+-humidité
+-température du sol
+-éclairement
 la sonde devra être suffisamment solide pour fonctionner en extérieur.
 elle ne sera pas reliée au réseau dans un premier temps
 je viendrais me connecter à la sonde.
@@ -29,3 +29,24 @@ l'étape d'après mettre en place une mesure température humidité et la voir s
 connecter une sonde de lumière et faire pareil
 voir comment évolue la lumière
 en suite lancer le serveur que si la lumière change.
+13/11/2025
+j'ai réussi à lancer le serveur et à m'y connecter depuis mon ordi et depuis mon tel.
+J'ai réussi à récupérer le fichier .json ce qui me permettra de récupérer les données
+sans avoir besoin de me connecter physiquement à l'ESP8266
+les oublis j'avais oublié la commande dmesg pour connaitre le USB sur lequel est l'ESP8266:
+dmesg
+je ne me souvenais plus des deux commandes rshell :
+rshell --port /dev/ttyUSB0 --baud 115200 --buffer-size 128 editor nano
+et pour shell python 
+repl 
+cela me suffit pour l'instant pour communiquer avec l'ESP8266 
+il faudra que puisse automatiser cette partie quand je passerai en production:
+charger le firmeware puis mes différents script tester l'ESP8266 puis le placer sur site
+les étapes sont donc 
+création des programmes sur l'ordi
+tests des programmes toujours sur l'ordi pour supprimer les erreurs de logique
+avec 80% de code couvert c'est bon j'essaye 95 mais cela demande beaucoup plus de temps
+création de mock 
+une fois que les tests passe envoi des programmes sur ESP8266 test sur l'ESP8266
+une fois que c'est valide je peux déployer pour test grandeur nature.
+La prochaine étape est de faire des mesures sur un capteur les enregistrer dans un fichier .json et de pouvoir les récupérer depuis mon tel.
