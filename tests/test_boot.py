@@ -2,6 +2,7 @@ import sys,os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 import json
 import boot
+from unittest.mock import patch
 
 def setup_function():
     # Nettoyage avant chaque test
@@ -34,6 +35,18 @@ def test_clear_old_log_removes_large_file():
         f.write(b"x" * 101_000)
     boot.clear_old_log()
     assert not os.path.exists("boot.log")
+
+def test_clear_old_log_handles_exception():
+    # s'assurer qu'un fichier existe
+    with open("boot.log", "wb") as f:
+        f.write(b"x" * 200_000) # gros fichier pour déclencher la condition
+
+    # On force os.stat à lever une exception
+    with patch("os.stat", side_effect=Exception("test error")):
+        boot.clear_old_log() # doivent PAS lever d'erreur
+
+    # Le fichier doit encore exister, car l'exception a empêché la suppression
+    assert os.path.exists("boot.log")
 
 def test_load_config_missing_file():
     # On s'assure que le fichier n'existe pas
