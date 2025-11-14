@@ -7,7 +7,7 @@ def start_server(net, mode, timeout=300, port=8080, stop_event=None): #le port=8
     try:
         s.bind(addr)
     except OSError as e:
-        print("Erreur lors du bind sur le port " + port + ":", e)
+        print("Erreur lors du bind sur le port " + str(port) + ":" , e)
         return
     s.listen(1)
     s.settimeout(1)
@@ -104,7 +104,7 @@ def start_server(net, mode, timeout=300, port=8080, stop_event=None): #le port=8
         </head>
         <body>
             <div class="card">
-                <h1>ESP32 """ + mode + """ </h1>
+                <h1>ESP32 (""" + mode + """) </h1>
                 <p><strong>Adresse IP :</strong>""" + ip +"""</p>
                 <p><strong>Dernière activité :</strong> pas d'heure</p>
                 <hr>

@@ -5,7 +5,7 @@ import time
 import os
 import threading
 
-import network_setup  # ton fichier à tester
+import network_setupancien  as network_setup # ton fichier à tester
 
 # === MOCK du Wi-Fi (pour remplacer network.WLAN) ===
 class MockNetwork:
