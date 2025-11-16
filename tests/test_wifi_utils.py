@@ -119,3 +119,37 @@ def test_esp_mode_true(monkeypatch):
         importlib.reload(w) # recharge pour forcer le chemin try/except
         assert w._ESP_MODE is True
         assert hasattr(w.network, "WLAN")
+def test_start_ap_fails_after_timeout(monkeypatch):
+    """Teste que start_ap retourne None et loggue un échec si l'AP n'active jamais."""
+    
+    # --- 1) Créer un faux AP qui ne devient jamais actif ---
+    fake_ap = MagicMock()
+    fake_ap.active.return_value = False
+    fake_ap.ifconfig.return_value = ("0.0.0.0", "", "", "")
+    
+    # WLAN() renvoie toujours ce fake_ap
+    fake_WLAN = MagicMock(return_value=fake_ap)
+
+    # --- 2) Mock network + boot.log ---
+    fake_log = MagicMock()
+
+    monkeypatch.setattr(
+        wifi_utils, "network",
+        types.SimpleNamespace(
+            AP_IF=1,
+            STA_IF=0,
+            WLAN=fake_WLAN,
+            AUTH_WPA_WPA2_PSK=3
+        )
+    )
+    monkeypatch.setattr(wifi_utils, "boot", types.SimpleNamespace(log=fake_log))
+
+    # --- 3) Mock time.sleep pour accélérer le test ---
+    monkeypatch.setattr(wifi_utils, "time", types.SimpleNamespace(sleep=lambda x: None))
+
+    # --- 4) Appeler start_ap ---
+    result = wifi_utils.start_ap({"ssid": "TestAP", "password": "12345678"})
+
+    # --- 5) Assertions ---
+    assert result is None                        # La fonction doit échouer
+    fake_log.assert_called_with("Echec de l'activation du point d'accès.")

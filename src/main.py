@@ -4,7 +4,11 @@
 import boot
 import wifi_utils
 import time
-import machine
+try:
+    import machine
+except ImportError:
+    import types
+    machine = types.SimpleNamespace(reset=lambda: None)
 from network_setup import start_server
 
 def safe_restart():
@@ -12,35 +16,39 @@ def safe_restart():
     time.sleep(5)
     machine.reset()
 
-# === Chargement de la configuration ===
-cfg = boot.load_config()
-mode = cfg.get("mode","AP").upper()
+def main():
+    # === Chargement de la configuration ===
+    cfg = boot.load_config()
+    mode = cfg.get("mode","AP").upper()
 
-boot.log("Démarrage en mode : " + mode )
+    boot.log("Démarrage en mode : " + mode )
 
-# === Démarrage selon le mode ===
-if mode == "AP":
-    ap = wifi_utils.start_ap(cfg["ap"])
-    if ap:
-        boot.log("Point d'accès actif, lancement du server web...")
-        start_server(ap, mode)
-    else:
-        boot.log("Impossible de démarrer le Wifi AP. Redémarrage...")
-        safe_restart()
-
-elif mode == "STA":
-    sta = wifi_utils.start_sta(cfg["sta"])
-    if not sta:
-        boot.log("Connexion STA échouée - bascule en AP")
+    # === Démarrage selon le mode ===
+    if mode == "AP":
         ap = wifi_utils.start_ap(cfg["ap"])
         if ap:
-            start_server(ap, "AP") # fallback en AP
+            boot.log("Point d'accès actif, lancement du server web...")
+            start_server(ap, mode)
         else:
+            boot.log("Impossible de démarrer le Wifi AP. Redémarrage...")
             safe_restart()
+
+    elif mode == "STA":
+        sta = wifi_utils.start_sta(cfg["sta"])
+        if not sta:
+            boot.log("Connexion STA échouée - bascule en AP")
+            ap = wifi_utils.start_ap(cfg["ap"])
+            if ap:
+                start_server(ap, "AP") # fallback en AP
+            else:
+                safe_restart()
+        else:
+            boot.log("Connexion STA réussie.")
+            boot.log("Lancement du serveur web...")
+            start_server(sta, "STA") # ici aussi, lancement du serveur
     else:
-        boot.log("Connexion STA réussie.")
-        boot.log("Lancement du serveur web...")
-        start_server(sta, "STA") # ici aussi, lancement du serveur
-else:
-    boot.log("Mode inconnu : " + mode)
-    safe_restart()
+        boot.log("Mode inconnu : " + mode)
+        safe_restart()
+
+if __name__ == "__main__":
+    main()

@@ -7,7 +7,7 @@ ou en une seule ligne
 sudo fuser -k 8081/tcp
 
 Pour essayer de compiler un script python
-python -m pycompile nomdufichier.py
+python -m py_compile nomdufichier.py
 
 Commande git
 git add . pour ajouter les modification

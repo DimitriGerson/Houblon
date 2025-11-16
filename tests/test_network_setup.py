@@ -1,96 +1,236 @@
-import unittest
-import socket
-import threading
-import time
-import os
-import threading
+import types
+import pytest
+from unittest.mock import MagicMock, mock_open
 
-import network_setupancien  as network_setup # ton fichier à tester
-
-# === MOCK du Wi-Fi (pour remplacer network.WLAN) ===
-class MockNetwork:
-    def ifconfig(self):
-        # retourne une IP simulée
-        return ("127.0.0.1", "255.255.255.0", "127.0.0.1", "8.8.8.8")
-
-# === TESTS UNITAIRES ===
-class TestStartServer(unittest.TestCase):
-
-    def setUp(self):
-        # Crée un fichier JSON temporaire pour les tests
-        with open("test.json", "w") as f:
-            f.write('{"test": "ok"}')
-
-    def tearDown(self):
-        # Nettoyage après chaque test
-        if os.path.exists("test.json"):
-            os.remove("test.json")
-
-    def test_server_serves_main_page(self):
-        """Le serveur doit renvoyer une page HTML valide"""
-        net = MockNetwork()
-
-        # Lance le serveur dans un thread séparé
-        stop_event = threading.Event()
-        server_thread = threading.Thread(
-            target=network_setup.start_server,
-            args=(net, "AP", 10, 8081, stop_event),
-            daemon=True
-        )
-        server_thread.start()
-        for _ in range(20):
-            try:
-                s = socket.socket()
-                s.connect(("127.0.0.1", 8081))
-                s.close()
-                break # le serveur est prêt
-            except ConnectionRefusedError:
-                time.sleep(0.5)  # laisse le temps au serveur de démarrer
-        else:
-            raise RuntimeError("Le server ne s'est pas lancé à temps")
-        # Se connecte au serveur
-        s = socket.socket()
-        s.connect(("127.0.0.1", 8081))
-        s.send(b"GET / HTTP/1.0\r\n\r\n")
-        data = s.recv(4096).decode()
-        s.close()
-        # après la requete HTTP
-        stop_event.set() #après la requête HTTP
-        server_thread.join()
-        self.assertIn("ESP32 (AP)", data)
-        self.assertIn("Fichiers disponibles", data)
-
-    def test_server_download_json(self):
-        """Le serveur doit renvoyer le contenu du fichier JSON demandé"""
-        net = MockNetwork()
-        stop_event = threading.Event()
-        # Lance le serveur dans un thread séparé
-        server_thread = threading.Thread(
-            target=network_setup.start_server,
-            args=(net, "AP", 10,8081, stop_event),
-            daemon=True
-        )
-        server_thread.start()
-        time.sleep(0.5)
-
-        s = socket.socket()
-        s.connect(("127.0.0.1", 8081))
-        s.send(b"GET /download?file=test.json HTTP/1.0\r\n\r\n")
-        data = s.recv(4096).decode()
-        s.close()
-        stop_event.set()
-        server_thread.join()
-        self.assertIn('"test": "ok"', data)
-
-    def test_server_timeout(self):
-        """Le serveur doit s'arrêter après inactivité"""
-        net = MockNetwork()
-        start_time = time.time()
-        network_setup.start_server(net, "AP", timeout=2)
-        duration = time.time() - start_time
-        # Il devrait s'arrêter au bout d'environ 2 secondes
-        self.assertLess(duration, 5)
+import network_setup
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_start_server_basic_html(monkeypatch):
+
+    # --- Fake network interface ---
+    fake_net = MagicMock()
+    fake_net.ifconfig.return_value = ("192.168.4.1", "", "", "")
+
+    # --- Fake socket client ---
+    fake_client = MagicMock()
+    fake_client.recv.return_value = b"GET / HTTP/1.1"
+    fake_client.send = MagicMock()
+
+    # Lorsqu'on ferme, rien à faire
+    fake_client.close = MagicMock()
+
+    # --- Fake server socket ---
+    fake_server = MagicMock()
+    fake_server.accept.return_value = (fake_client, ("1.2.3.4", 1234))
+    fake_server.bind = MagicMock()
+    fake_server.listen = MagicMock()
+    fake_server.settimeout = MagicMock()
+
+    # --- Mock de socket.socket() ---
+    monkeypatch.setattr(network_setup.socket, "socket", lambda: fake_server)
+
+    # --- Mock getaddrinfo ---
+    monkeypatch.setattr(network_setup.socket, "getaddrinfo",
+                        lambda *args: [(None, None, None, None, ("0.0.0.0", 8080))])
+
+    # --- Mock os.listdir pour générer 2 fichiers json ---
+    monkeypatch.setattr(network_setup.os, "listdir",
+                        lambda: ["config.json", "data.json", "readme.txt"])
+
+    # --- Empêcher la boucle infinie : 1 requête puis exit ---
+    calls = {"n": 0}
+
+    def fake_accept():
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return (fake_client, ("1.2.3.4", 1234))
+        raise KeyboardInterrupt  # quitte start_server proprement
+
+    fake_server.accept.side_effect = fake_accept
+
+    # --- Exécution ---
+    with pytest.raises(KeyboardInterrupt):
+        network_setup.start_server(fake_net, "AP")
+
+    # --- Vérification que le HTML a été envoyé ---
+    sent_data = b"".join(
+        call.args[0] for call in fake_client.send.call_args_list
+    ).decode()
+
+    assert "<h1>ESP8266 AP</h1>" in sent_data
+    assert 'Télécharger config.json' in sent_data
+    assert 'Télécharger data.json' in sent_data
+
+def test_start_server_download(monkeypatch):
+
+    fake_net = MagicMock()
+    fake_net.ifconfig.return_value = ("192.168.4.1", "", "", "")
+
+    # --- Fake JSON file ---
+    monkeypatch.setattr(network_setup.os, "listdir",
+                        lambda: ["cfg.json"])
+
+    fake_file = mock_open(read_data='{"ok": true}')
+    monkeypatch.setattr(network_setup, "open", fake_file, raising=False)
+
+
+    # --- Fake socket client ---
+    fake_client = MagicMock()
+    fake_client.recv.return_value = b"GET /download?file=cfg.json HTTP/1.1"
+    fake_client.send = MagicMock()
+    fake_client.close = MagicMock()
+
+    # --- Fake server ---
+    fake_server = MagicMock()
+    fake_server.bind = MagicMock()
+    fake_server.listen = MagicMock()
+    fake_server.settimeout = MagicMock()
+
+    # Boucle : 1 accept → stop
+    fake_server.accept.side_effect = [
+        (fake_client, ("1.2.3.4", 1234)),
+        KeyboardInterrupt
+    ]
+
+    # Mock socket.socket()
+    monkeypatch.setattr(network_setup.socket, "socket", lambda: fake_server)
+    monkeypatch.setattr(network_setup.socket, "getaddrinfo",
+                        lambda *args: [(None, None, None, None, ("0.0.0.0", 8080))])
+
+    with pytest.raises(KeyboardInterrupt):
+        network_setup.start_server(fake_net, "AP")
+
+    # Vérifie que la réponse JSON a été envoyée
+    sent_raw = b"".join(
+        call.args[0].encode() if isinstance(call.arg[0], str) else call.args[0]
+        for call in fake_client.send.call_args_list
+    )
+
+    assert b"Content-Type: application/json" in sent_raw
+    assert b'{"ok": true}' in sent_raw
+
+def test_start_server_bind_fails(monkeypatch):
+    fake_net = MagicMock()
+    fake_net.ifconfig.return_value = ("1.1.1.1", "", "", "")
+
+    fake_socket = MagicMock()
+
+    def fake_bind(addr):
+        raise OSError("port in use")
+
+    fake_socket.bind = fake_bind
+
+    monkeypatch.setattr(network_setup.socket, "socket", lambda: fake_socket)
+    monkeypatch.setattr(network_setup.socket, "getaddrinfo",
+                        lambda *args: [(None, None, None, None, ("0.0.0.0", 8080))])
+
+    # NE DOIT PAS lever d’erreur
+    result = network_setup.start_server(fake_net, "AP")
+
+    assert result is None
+
+def test_start_server_accept_timeout(monkeypatch):
+
+    fake_net = MagicMock()
+    fake_net.ifconfig.return_value = ("192.168.4.1", "", "", "")
+
+    fake_server = MagicMock()
+    fake_server.bind = MagicMock()
+    fake_server.listen = MagicMock()
+    fake_server.settimeout = MagicMock()
+    fake_server.accept.side_effect = [OSError, KeyboardInterrupt]
+
+    monkeypatch.setattr(network_setup.socket, "socket", lambda: fake_server)
+    monkeypatch.setattr(network_setup.socket, "getaddrinfo",
+                        lambda *args: [(None, None, None, None, ("0.0.0.0", 8080))])
+
+    with pytest.raises(KeyboardInterrupt):
+        network_setup.start_server(fake_net, "AP")
+
+    # Vérifie que accept a bien été appelé plusieurs fois
+    assert fake_server.accept.call_count == 2
+def test_start_server_empty_request(monkeypatch):
+    """Teste le cas où recv() renvoie b'' (aucune donnée) et vérifie que cl.close() est appelé."""
+
+    # --- Fake réseau ---
+    fake_net = MagicMock()
+    fake_net.ifconfig.return_value = ("192.168.4.1", "", "", "")
+
+    # --- Fake client socket ---
+    fake_client = MagicMock()
+    fake_client.recv.return_value = b""      # <<< CAS À TESTER : aucune donnée
+    fake_client.close = MagicMock()
+
+    # --- Fake server socket ---
+    fake_server = MagicMock()
+    fake_server.bind = MagicMock()
+    fake_server.listen = MagicMock()
+    fake_server.settimeout = MagicMock()
+
+    # Pour stopper la boucle après 1 tour  
+    fake_server.accept.side_effect = [
+        (fake_client, ("1.2.3.4", 1234)),
+        KeyboardInterrupt          # STOP après la première boucle
+    ]
+
+    # --- Mock de socket ---
+    monkeypatch.setattr(network_setup.socket, "socket", lambda: fake_server)
+    monkeypatch.setattr(network_setup.socket, "getaddrinfo",
+                        lambda *args: [(None, None, None, None, ("0.0.0.0", 8080))])
+
+    # --- Mock liste de fichiers pour éviter soucis ---
+    monkeypatch.setattr(network_setup.os, "listdir", lambda: [])
+
+    with pytest.raises(KeyboardInterrupt):
+        network_setup.start_server(fake_net, "AP")
+
+    # Vérifie que close() a été appelé car request était vide
+    fake_client.close.assert_called_once()
+
+def test_start_server_download_404(monkeypatch):
+    """Teste le cas où le fichier demandé n'existe pas -> réponse 404."""
+
+    # --- Fake réseau ---
+    fake_net = MagicMock()
+    fake_net.ifconfig.return_value = ("192.168.4.1", "", "", "")
+
+    # --- Fake système de fichiers ---
+    # Le serveur verra seulement "cfg.json" -> "fake.json" doit faire un 404
+    monkeypatch.setattr(network_setup.os, "listdir",
+                        lambda: ["cfg.json"])
+
+    # --- Fake client socket ---
+    fake_client = MagicMock()
+    fake_client.recv.return_value = b"GET /download?file=fake.json HTTP/1.1"
+    fake_client.close = MagicMock()
+    fake_client.send = MagicMock()
+
+    # --- Fake server socket ---
+    fake_server = MagicMock()
+    fake_server.bind = MagicMock()
+    fake_server.listen = MagicMock()
+    fake_server.settimeout = MagicMock()
+
+    # Accepte UNE connexion → puis on stoppe avec KeyboardInterrupt
+    fake_server.accept.side_effect = [
+        (fake_client, ("1.2.3.4", 1234)),
+        KeyboardInterrupt
+    ]
+
+    # Mock socket.socket() + getaddrinfo()
+    monkeypatch.setattr(network_setup.socket, "socket", lambda: fake_server)
+    monkeypatch.setattr(network_setup.socket, "getaddrinfo",
+                        lambda *args: [(None, None, None, None, ("0.0.0.0", 8080))])
+
+    with pytest.raises(KeyboardInterrupt):
+        network_setup.start_server(fake_net, "AP")
+
+    # --- Vérification : le serveur doit avoir envoyé un 404 ---
+    sent_raw = b"".join(
+        (arg.encode() if isinstance(arg, str) else arg)
+        for call in fake_client.send.call_args_list
+        for arg in call.args
+    )
+
+    assert b"404 NOT FOUND" in sent_raw
+    assert b"Fichier non trouve" in sent_raw or b"Fichier non trouv" in sent_raw
