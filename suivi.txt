@@ -50,3 +50,8 @@ création de mock
 une fois que les tests passe envoi des programmes sur ESP8266 test sur l'ESP8266
 une fois que c'est valide je peux déployer pour test grandeur nature.
 La prochaine étape est de faire des mesures sur un capteur les enregistrer dans un fichier .json et de pouvoir les récupérer depuis mon tel.
+J'ai ajouté un dépot git avec un token.
+J'ai ajouter git config --global credential.helper cache 
+mais j'aurai du faire
+git config --global credential.helper 'cache --timeout=3600'
+
