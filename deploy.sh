@@ -26,7 +26,8 @@ fi
 echo "→ Port détecté : $PORT"
 
 # Effacer les anciens fichiers (optionnel)
-mpremote connect $PORT fs wipe
+# mpremote connect $PORT fs wipe
+# préfère commenter cela pour l'instant 
 
 # Envoyer les fichiers
 for file in src/*.py; do
