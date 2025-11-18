@@ -54,4 +54,4 @@ J'ai ajouté un dépot git avec un token.
 J'ai ajouter git config --global credential.helper cache 
 mais j'aurai du faire
 git config --global credential.helper 'cache --timeout=3600'
-
+Pour ajouter une issue à une branch il faut faire un commit qui inclue cette issue exemple Ajout de la procédure pour lier une issue #2
