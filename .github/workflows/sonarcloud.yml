@@ -49,7 +49,9 @@ jobs:
              -Dsonar.projectKey=DimitriGerson_Houblon
              -Dsonar.organization=dimitrigerson
              -Dsonar.host.url=https://sonarcloud.io
-             -Dsonar.sources=.
+             -Dsonar.sources=src
+             -Dsonar.tests=test
+             -Dsonar.python.coverage.reportPaths=coverage.xml
              -Dproject.settings=./sonar-project.properties
              -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} 
              -Dsonar.pullrequest.branch=${{ github.head_ref }} 
