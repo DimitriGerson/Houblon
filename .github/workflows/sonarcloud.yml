@@ -30,9 +30,10 @@ jobs:
           key: ${{ runner.os }}-sonar
 
       # Étape 4 : lancer l'analyse SonarCloud
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
+      - name: SonarCloud / SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@aa49445
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           organization: DimitriGerson      # Nom de ton organisation SonarCloud
           projectKey: DimitriGerson_Houblon          # Clé du projet sur SonarCloud
-          token: ${{ secrets.SONAR_TOKEN }}
