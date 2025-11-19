@@ -16,7 +16,7 @@ jobs:
       # Étape 1 : récupérer le code du dépôt
       - uses: actions/checkout@v3
 
-      # Étape 2 : configurer Java si nécessaire (pour SonarScanner)
+      # Étape 2 : configurer python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
