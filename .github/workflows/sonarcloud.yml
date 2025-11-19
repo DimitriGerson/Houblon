@@ -25,12 +25,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest coverage
+          pip install pytest pytest-cov
 
       - name: Run tests and generate coverage
         run: |
-          coverage run -m pytest
-          coverage xml -o coverage.xml
+          pytest --cov=Houblon --cov-report=xml
       # Étape 3 : mettre en cache les fichiers Sonar pour accélérer
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
