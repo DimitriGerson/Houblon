@@ -35,5 +35,8 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          organization: DimitriGerson      # Nom de ton organisation SonarCloud
-          projectKey: DimitriGerson_Houblon          # Clé du projet sur SonarCloud
+          args: >
+             -Dsonar.projectKey=DimitriGerson_Houblon
+             -Dsonar.organization=DimitriGerson
+             -Dsonar.host.url=https://sonarcloud.io
+             -Dsonar.sources=.
