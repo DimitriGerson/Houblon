@@ -20,8 +20,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
-
+            distribution: 'temurin'   # OBLIGATOIRE
+            java-version: '17'
       # Étape 3 : mettre en cache les fichiers Sonar pour accélérer
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
