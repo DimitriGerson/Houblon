@@ -29,7 +29,7 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
 
-      # Étape 4 : lancer l'analyse SonarCloud
+      # Étape 4 : lancer l'analyse SonarCloud Modification du key
       - name: SonarCloud / SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@aa494459d7c39c106cc77b166de8b4250a32bb97
         env:
