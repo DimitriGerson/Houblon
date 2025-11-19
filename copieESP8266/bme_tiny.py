@@ -48,7 +48,7 @@ class Device:
     self._address = address
     self._i2c = i2c
 
-  def writeRaw8(self, value):
+  def write_raw8(self, value):
     """Write an 8-bit value on the bus (without register)."""
     value = value & 0xFF
     self._i2c.writeto(self._address, value)
@@ -67,23 +67,23 @@ class Device:
     b[1]= (value>>8) & 0xFF
     self.i2c.writeto_mem(self._address, register, value)
 
-  def readRaw8(self):
+  def read_raw8(self):
     """Read an 8-bit value on the bus (without register)."""
     return int.from_bytes(self._i2c.readfrom(self._address, 1),'little') & 0xFF
 
-  def readU8(self, register):
+  def read_u8(self, register):
     """Read an unsigned byte from the specified register."""
     return int.from_bytes(
         self._i2c.readfrom_mem(self._address, register, 1),'little') & 0xFF
 
-  def readS8(self, register):
+  def read_s8(self, register):
     """Read a signed byte from the specified register."""
     result = self.readU8(register)
     if result > 127:
       result -= 256
     return result
 
-  def readU16(self, register, little_endian=True):
+  def read_u16(self, register, little_endian=True):
     """Read an unsigned 16-bit value from the specified register, with the
     specified endianness (default little endian, or least significant byte
     first)."""
@@ -93,7 +93,7 @@ class Device:
       result = ((result << 8) & 0xFF00) + (result >> 8)
     return result
 
-  def readS16(self, register, little_endian=True):
+  def read_s16(self, register, little_endian=True):
     """Read a signed 16-bit value from the specified register, with the
     specified endianness (default little endian, or least significant byte
     first)."""
@@ -102,25 +102,25 @@ class Device:
       result -= 65536
     return result
 
-  def readU16LE(self, register):
+  def read_u16_le(self, register):
     """Read an unsigned 16-bit value from the specified register, in little
     endian byte order."""
-    return self.readU16(register, little_endian=True)
+    return self.read_u16(register, little_endian=True)
 
-  def readU16BE(self, register):
+  def read_u16_le(self, register):
     """Read an unsigned 16-bit value from the specified register, in big
     endian byte order."""
-    return self.readU16(register, little_endian=False)
+    return self.read_u16(register, little_endian=False)
 
-  def readS16LE(self, register):
+  def read_s16_le(self, register):
     """Read a signed 16-bit value from the specified register, in little
     endian byte order."""
-    return self.readS16(register, little_endian=True)
+    return self.read_s16(register, little_endian=True)
 
-  def readS16BE(self, register):
+  def read_s16_be(self, register):
     """Read a signed 16-bit value from the specified register, in big
     endian byte order."""
-    return self.readS16(register, little_endian=False)
+    return self.read_s16(register, little_endian=False)
 
 
 class BME280:
@@ -145,19 +145,19 @@ class BME280:
 
   def _load_calibration(self):
 
-    self.dig_T1 = self._device.readU16LE(BME280_REGISTER_DIG_T1)
-    self.dig_T2 = self._device.readS16LE(BME280_REGISTER_DIG_T2)
+    self.dig_T1 = self._device.read_u16_le(BME280_REGISTER_DIG_T1)
+    self.dig_T2 = self._device.read_u16_le(BME280_REGISTER_DIG_T2)
     self.dig_T3 = self._device.readS16LE(BME280_REGISTER_DIG_T3)
 
-    self.dig_P1 = self._device.readU16LE(BME280_REGISTER_DIG_P1)
-    self.dig_P2 = self._device.readS16LE(BME280_REGISTER_DIG_P2)
-    self.dig_P3 = self._device.readS16LE(BME280_REGISTER_DIG_P3)
-    self.dig_P4 = self._device.readS16LE(BME280_REGISTER_DIG_P4)
-    self.dig_P5 = self._device.readS16LE(BME280_REGISTER_DIG_P5)
-    self.dig_P6 = self._device.readS16LE(BME280_REGISTER_DIG_P6)
-    self.dig_P7 = self._device.readS16LE(BME280_REGISTER_DIG_P7)
-    self.dig_P8 = self._device.readS16LE(BME280_REGISTER_DIG_P8)
-    self.dig_P9 = self._device.readS16LE(BME280_REGISTER_DIG_P9)
+    self.dig_P1 = self._device.read_u16_le(BME280_REGISTER_DIG_P1)
+    self.dig_P2 = self._device.read_u16_le(BME280_REGISTER_DIG_P2)
+    self.dig_P3 = self._device.read_u16_le(BME280_REGISTER_DIG_P3)
+    self.dig_P4 = self._device.read_u16_le(BME280_REGISTER_DIG_P4)
+    self.dig_P5 = self._device.read_u16_le(BME280_REGISTER_DIG_P5)
+    self.dig_P6 = self._device.read_u16_le(BME280_REGISTER_DIG_P6)
+    self.dig_P7 = self._device.read_u16_le(BME280_REGISTER_DIG_P7)
+    self.dig_P8 = self._device.read_u16_le(BME280_REGISTER_DIG_P8)
+    self.dig_P9 = self._device.read_u16_le(BME280_REGISTER_DIG_P9)
 
   def read_raw_temp(self):
     """Reads the raw (uncompensated) temperature from the sensor."""
@@ -170,9 +170,9 @@ class BME280:
     sleep_time = sleep_time + 2300 * (1 << self._mode) + 575
     sleep_time = sleep_time + 2300 * (1 << self._mode) + 575
     time.sleep_us(sleep_time)  # Wait the required time
-    msb = self._device.readU8(BME280_REGISTER_TEMP_DATA)
-    lsb = self._device.readU8(BME280_REGISTER_TEMP_DATA + 1)
-    xlsb = self._device.readU8(BME280_REGISTER_TEMP_DATA + 2)
+    msb = self._device.read_u8(BME280_REGISTER_TEMP_DATA)
+    lsb = self._device.read_u8(BME280_REGISTER_TEMP_DATA + 1)
+    xlsb = self._device.read_u8(BME280_REGISTER_TEMP_DATA + 2)
     raw = ((msb << 16) | (lsb << 8) | xlsb) >> 4
     return raw
 
@@ -180,9 +180,9 @@ class BME280:
     """Reads the raw (uncompensated) pressure level from the sensor."""
     """Assumes that the temperature has already been read """
     """i.e. that enough delay has been provided"""
-    msb = self._device.readU8(BME280_REGISTER_PRESSURE_DATA)
-    lsb = self._device.readU8(BME280_REGISTER_PRESSURE_DATA + 1)
-    xlsb = self._device.readU8(BME280_REGISTER_PRESSURE_DATA + 2)
+    msb = self._device.read_u8(BME280_REGISTER_PRESSURE_DATA)
+    lsb = self._device.read_u8(BME280_REGISTER_PRESSURE_DATA + 1)
+    xlsb = self._device.read_u8(BME280_REGISTER_PRESSURE_DATA + 2)
     raw = ((msb << 16) | (lsb << 8) | xlsb) >> 4
     return raw
 
