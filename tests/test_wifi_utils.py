@@ -17,9 +17,9 @@ cfg_sta = {
 }
 
 def test_disable_all_wifi():
-    wifi_utils.disable_all_wifi()
-    # Pas d'erreur = succès
-    assert True
+    with pytest.raises(Exception) as exc:
+        wifi_utils.disable_all_wifi()
+    assert False, f"Une exception a été levée : {exc}"
 
 def test_start_ap_returns_wlan():
     ap = wifi_utils.start_ap(cfg_ap)
