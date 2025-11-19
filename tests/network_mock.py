@@ -35,5 +35,5 @@ class MockWLAN:
     def config(self, **kwargs):
         self._cfg.update(kwargs)
 # --- Fonction globale attendue par wifi_utils ---
-def WLAN(mode):
+def wlan(mode):
     return MockWLAN(mode)
