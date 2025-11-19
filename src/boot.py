@@ -22,7 +22,7 @@ def log(msg):
             f.write(line)
 
     except Exception as e:
-        print("Une erreur est survenue : " + e)
+        print("Une erreur est survenue : " + str(e))
 
 def clear_old_log():
     """Efface le log s'il dépasse 100 Ko."""
@@ -30,9 +30,9 @@ def clear_old_log():
         if LOG_FILE in os.listdir() and os.stat(LOG_FILE)[6] > 100_000:
             os.remove(LOG_FILE)
             print("Log effacé (trop volumineux).")
-    except OSError as e:
-        print("Erreur lors de la suppression du log : " + str(e) )
-
+    except Exception:
+        pass
+        
 def load_config():
     """Charge la configyration réseau depuis config.json."""
     try:
