@@ -27,7 +27,7 @@ def log(msg):
 def clear_old_log():
     """Efface le log s'il dépasse 100 Ko."""
     try:
-        if LOG_FILE in os.listdir() and os.stat(LOG_FILE).[6] > 100_000:
+        if LOG_FILE in os.listdir() and os.stat(LOG_FILE)[6] > 100_000:
             os.remove(LOG_FILE)
             print("Log effacé (trop volumineux).")
     except OSError as e:
