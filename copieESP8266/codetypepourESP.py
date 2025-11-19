@@ -30,13 +30,13 @@ def led_error( step ):
     global led
     t = time()
     while ( time()-t ) < ERROR_REBOOT_TIME:
-        for i in range( 20 ):
+        for _ in range( 20 ):
             led.value( not(led.value()))
             sleep(0.100)
         led.value(1) #eteindre
         sleep(1)
         # clignote nbr fois
-        for i in range ( step ):
+        for ° in range ( step ):
             led.value(0)
             sleep(0.5)
             led.value(1)

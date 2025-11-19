@@ -5,9 +5,6 @@ AP_IF = 1
 AUTH_WPA_WPA2_PSK = 3
 
 class MockWLAN:
-    #STA_IF = 0
-    #AP_IF = 1
-    #AUTH_WPA_WPA2_PSK = 3
 
     def __init__(self, mode):
         self.mode = mode
