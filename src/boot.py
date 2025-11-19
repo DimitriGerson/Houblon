@@ -21,8 +21,8 @@ def log(msg):
         with open(LOG_FILE, "a") as f:
             f.write(line)
 
-    except:
-        pass
+    except Exception as e:
+        print("Une erreur est survenue : " + e)
 
 def clear_old_log():
     """Efface le log s'il dépasse 100 Ko."""
