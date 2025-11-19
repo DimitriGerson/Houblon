@@ -48,3 +48,4 @@ jobs:
              -Dsonar.organization=dimitrigerson
              -Dsonar.host.url=https://sonarcloud.io
              -Dsonar.sources=.
+             -Dproject.settings=./sonar-project.properties
