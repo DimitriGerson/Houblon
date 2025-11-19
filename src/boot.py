@@ -30,8 +30,8 @@ def clear_old_log():
         if LOG_FILE in os.listdir() and os.stat(LOG_FILE)[6] > 100_000:
             os.remove(LOG_FILE)
             print("Log effacé (trop volumineux).")
-    except:
-        pass
+    except OSError as e:
+        print("Erreur lors de la suppression du log : " + e )
 
 def load_config():
     """Charge la configyration réseau depuis config.json."""
