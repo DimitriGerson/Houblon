@@ -13,6 +13,9 @@ Les tests sont passé cela fonctionne.
 pour faire passer les tests il suffit de se mettre dans le répertoire courant
 et de taper
 pytest -v
+il est aussi possible de juste taper
+pytest
+le fichier pytest.ini paramètre pytest 
 maintenant je dois faire un mini serveur sur le esp et pouvoir aller dessus
 c'est la prochaine étape 
 j'ai un fichier config.json qui me permet de choisir ma config sans passer par le code.
