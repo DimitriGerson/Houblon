@@ -16,12 +16,13 @@ def stop_server():
     global stop_server_flag
     stop_server_flag = True
 
-def start_server(net, mode, port=8080, timeout=300, stop_event=None):
+def start_server(net, mode, port=8080):
+    global stop_server_flag
+    stop_server_flag = False #Réinitialise à chaque lancement
 
     addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
     s = socket.socket()
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
+    #s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
         s.bind(addr)
     except OSError as e:
@@ -34,29 +35,40 @@ def start_server(net, mode, port=8080, timeout=300, stop_event=None):
     ip = net.ifconfig()[0]
     print("Serveur web actif sur http://" + ip + ":" + str(port))
 
-    last_activity = time.time()
-
-    while True:
-
+    while not stop_server_flag:
         try:
             cl, addr = s.accept()
-        except OSError:
+            request = cl.recv(1024).decode()
+        except Exception:
             continue
 
         print("Client connecté depuis", addr)
-
-        request = cl.recv(1024)
         if not request:
             cl.close()
             continue
 
-        request = request.decode()
+        # --- STOP via URL ---
+        if "GET /stop" in request:
+            cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n")
+            cl.send("<html>>body><h1>Serveur arrêté</h1></body></html>")
+            stop_server_flag = True
+            cl.close()
+            break
+
+        # --- REDEMARRER via URL ---
+        if "GET /restart" in request:
+            cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n")
+            cl.send("<html><body><h1>Redémarrage...</h1></body></html>")
+            cl.close()
+            machine.reset() #Redémarre l'ESP
+            break
 
         # --- Génération des liens fichiers ---
-        files = [f for f in os.listdir() if f.endswith(".json")]
-        file_links = ""
-        for f in files:
-            file_links += '<li><a href="/download?file=' + f + '">Télécharger ' + f + '</a></li>'
+        files = [f for f in os.listdir() if f.endswith('.json')]
+        file_links = ''.join(
+            '<li><a href="/download?file=' + f + '">Télécharger ' + f + '</a></li>'
+            for f in files
+        )
 
         # --- Téléchargement ---
         if "/download?file=" in request:
@@ -72,7 +84,7 @@ def start_server(net, mode, port=8080, timeout=300, stop_event=None):
             cl.close()
             continue
 
-        # --- HTML (version allégée pour ESP8266) ---
+        # --- HTML (version allégée pour ESP8266 avec boutons STOP et REDEMARRER) ---
         html = (
             "<html><body>"
             "<h1>ESP8266 " + mode + "</h1>"
@@ -80,9 +92,15 @@ def start_server(net, mode, port=8080, timeout=300, stop_event=None):
             "<h3>Fichiers :</h3><ul>"
             + file_links +
             "</ul>"
+            "<br>"
+            "<form action='/stop' method='get'>"
+               "<button type='submit'>STOP SERVEUR</buton>"
+            "</form>"
             "</body></html>"
         )
 
         response = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" + html
         cl.send(response.encode())
         cl.close()
+    print("Arret du serveur.")
+    s.close()
