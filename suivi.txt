@@ -4,17 +4,33 @@ de récupérer des information sur la vie du houblon sauvage
 -humidité
 -température du sol
 -éclairement
+
+Le fonctionnement
 la sonde devra être suffisamment solide pour fonctionner en extérieur.
+
 elle ne sera pas reliée au réseau dans un premier temps
+
 je viendrais me connecter à la sonde.
-J'ai réalisé l'ensemble des fichiers boot main about_esp wifi_utils ainsi qu'un mock de
-network pour pouvoir tout tester.
+
+Journal
+J'ai réalisé l'ensemble des fichiers :
+boot, main, about_esp, wifi_utils, network_setup
+
+Pour les tests
+un mock denetwork pour pouvoir tout tester.
 Les tests sont passé cela fonctionne.
+j'essaye d'être à plus de 90% mais ce ne sera pas possible tout le temps
+
 pour faire passer les tests il suffit de se mettre dans le répertoire courant
 et de taper
 pytest -v
+il est aussi possible de juste taper
+pytest
+le fichier pytest.ini paramètre pytest 
+
 maintenant je dois faire un mini serveur sur le esp et pouvoir aller dessus
-c'est la prochaine étape 
+c'est la prochaine étape
+fichier config.json 
 j'ai un fichier config.json qui me permet de choisir ma config sans passer par le code.
 je dois maintenant tester cela en vrai
 faire un mini serveur et modifier la config
@@ -25,6 +41,10 @@ J'ai tester mon serveur en test unitaire maintenant je dois exporter l'ensemble 
 -network_setup.py
 puis les lancer pour voir si cela fonctionne
 aller me connecter à mon server en AP.
+
+J'ai fait une première version du server 
+Je dois la tester
+
 l'étape d'après mettre en place une mesure température humidité et la voir sur le serveur
 connecter une sonde de lumière et faire pareil
 voir comment évolue la lumière
@@ -40,7 +60,7 @@ rshell --port /dev/ttyUSB0 --baud 115200 --buffer-size 128 editor nano
 et pour shell python 
 repl 
 cela me suffit pour l'instant pour communiquer avec l'ESP8266 
-il faudra que puisse automatiser cette partie quand je passerai en production:
+il faudra que je puisse automatiser cette partie quand je passerai en production:
 charger le firmeware puis mes différents script tester l'ESP8266 puis le placer sur site
 les étapes sont donc 
 création des programmes sur l'ordi
