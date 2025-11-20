@@ -1,20 +1,4 @@
 import socket, os, time
-try:
-    import machine
-except ImportError:
-    # Mock minimal pour les tests sur pc
-    class MockMachine:
-        Pin = object
-
-    machine = MockMachine()
-
-
-# Flag global pour arrêter le serveur
-stop_server_flag = False
-
-def stop_server():
-    global stop_server_flag
-    stop_server_flag = True
 
 def start_server(net, mode, port=8080, timeout=300, stop_event=None):
 

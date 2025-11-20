@@ -4,6 +4,13 @@ from unittest.mock import MagicMock, mock_open
 
 import network_setup
 
+def test_stop_server():
+    # Reinitialiser la variable globale avant le test
+    network_setup.stop_server_flag = False
+
+    network_setup.stop_server()
+
+    assert network_setup.stop_server_flag is True
 
 def test_start_server_basic_html(monkeypatch):
 
