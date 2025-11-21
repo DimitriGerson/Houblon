@@ -31,7 +31,8 @@ def start_server(net, mode, port=8080):
 
     s.listen(1)
     s.settimeout(1)
-
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    
     ip = net.ifconfig()[0]
     print("Serveur web actif sur http://" + ip + ":" + str(port))
 
@@ -46,19 +47,20 @@ def start_server(net, mode, port=8080):
         if not request:
             cl.close()
             continue
+        request_line = request.split('\r\n')[0]   # ex: "GET /stop HTTP/1.1
 
         # --- STOP via URL ---
-        if "GET /stop" in request:
-            cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n")
-            cl.send("<html>>body><h1>Serveur arrêté</h1></body></html>")
+        if request_line.startswith("GET /stop"):
+            cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n".encode())
+            cl.send("<html><body><h1>Serveur arrêté</h1></body></html>")
             stop_server_flag = True
             cl.close()
             break
 
         # --- REDEMARRER via URL ---
-        if "GET /restart" in request:
-            cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n")
-            cl.send("<html><body><h1>Redémarrage...</h1></body></html>")
+        if request_line.startswith("GET /restart"):
+            cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n".encode())
+            cl.send("<html><body><h1>Redémarrage...</h1></body></html>".encode())
             cl.close()
             machine.reset() #Redémarre l'ESP
             break
@@ -77,10 +79,10 @@ def start_server(net, mode, port=8080):
                 with open(filename) as fp:
                     content = fp.read()
                 header = "HTTP/1.0 200 OK\r\nContent-Type: application/json\r\n\r\n"
-                cl.send(header)
-                cl.send(content)
+                cl.send(header.encode())
+                cl.send(content.encode())
             else:
-                cl.send("HTTP/1.0 404 NOT FOUND\r\n\r\nFichier non trouvé.")
+                cl.send("HTTP/1.0 404 NOT FOUND\r\n\r\nFichier non trouvé.".encode())
             cl.close()
             continue
 
@@ -94,7 +96,10 @@ def start_server(net, mode, port=8080):
             "</ul>"
             "<br>"
             "<form action='/stop' method='get'>"
-               "<button type='submit'>STOP SERVEUR</buton>"
+               "<button type='submit'>STOP SERVEUR</button>"
+            "</form>"
+            "<form action='/restart' method='get'>"
+            "<button type='submit'>REDEMARRER ESP</button>"
             "</form>"
             "</body></html>"
         )
