@@ -22,7 +22,7 @@ def start_server(net, mode, port=8080):
 
     addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
     s = socket.socket()
-    #s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
         s.bind(addr)
     except OSError as e:
@@ -47,12 +47,12 @@ def start_server(net, mode, port=8080):
         if not request:
             cl.close()
             continue
-        request_line = request.split('\r\n')[0]   # ex: "GET /stop HTTP/1.1
+        request_line = request.split('\r\n')[0]   # ex: "GET /stop HTTP/1.1"
 
         # --- STOP via URL ---
         if request_line.startswith("GET /stop"):
             cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n".encode())
-            cl.send("<html><body><h1>Serveur arrêté</h1></body></html>")
+            cl.send("<html><body><h1>Serveur arrêté</h1></body></html>".encode())
             stop_server_flag = True
             cl.close()
             break
@@ -76,8 +76,9 @@ def start_server(net, mode, port=8080):
         if "/download?file=" in request:
             filename = request.split("/download?file=")[1].split(" ")[0]
             if filename in files:
-                with open(filename) as fp:
+                with open(filename, encoding="utf-8") as fp:
                     content = fp.read()
+                cl.send(content.encode("utf-8")
                 header = "HTTP/1.0 200 OK\r\nContent-Type: application/json\r\n\r\n"
                 cl.send(header.encode())
                 cl.send(content.encode())
