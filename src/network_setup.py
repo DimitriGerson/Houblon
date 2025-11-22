@@ -51,7 +51,7 @@ def start_server(net, mode, port=8080):
 
         # --- STOP via URL ---
         if request_line.startswith("GET /stop"):
-            cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n".encode())
+            cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n".encode())
             cl.send("<html><body><h1>Serveur arrêté</h1></body></html>".encode())
             stop_server_flag = True
             cl.close()
@@ -59,7 +59,7 @@ def start_server(net, mode, port=8080):
 
         # --- REDEMARRER via URL ---
         if request_line.startswith("GET /restart"):
-            cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n".encode())
+            cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n".encode())
             cl.send("<html><body><h1>Redémarrage...</h1></body></html>".encode())
             cl.close()
             machine.reset() #Redémarre l'ESP
@@ -76,12 +76,14 @@ def start_server(net, mode, port=8080):
         if "/download?file=" in request:
             filename = request.split("/download?file=")[1].split(" ")[0]
             if filename in files:
-                with open(filename, encoding="utf-8") as fp:
-                    content = fp.read()
-                cl.send(content.encode("utf-8")
-                header = "HTTP/1.0 200 OK\r\nContent-Type: application/json\r\n\r\n"
-                cl.send(header.encode())
-                cl.send(content.encode())
+                try:
+                    with open(filename,"r", encoding="utf-8") as fp:
+                        content = fp.read()
+                    header = "HTTP/1.0 200 OK\r\nContent-Type: application/json; charset=utf-8\r\n\r\n"
+                    cl.send(header.encode())
+                    cl.send(content.encode("utf-8"))
+                except Exception as e:
+                    cl.send("HTTP/1.0 500 ERROR\r\n\r\nErreur lecture fichier.".encode())
             else:
                 cl.send("HTTP/1.0 404 NOT FOUND\r\n\r\nFichier non trouvé.".encode())
             cl.close()
@@ -105,7 +107,7 @@ def start_server(net, mode, port=8080):
             "</body></html>"
         )
 
-        response = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" + html
+        response = "HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=utf8\r\n\r\n" + html
         cl.send(response.encode())
         cl.close()
     print("Arret du serveur.")
