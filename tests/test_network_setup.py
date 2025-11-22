@@ -109,7 +109,7 @@ def test_start_server_download(monkeypatch):
 
     # Vérifie que la réponse JSON a été envoyée
     sent_raw = b"".join(
-        call.args[0].encode() if isinstance(call.arg[0], str) else call.args[0]
+        call.args[0].encode() if isinstance(call.args[0], str) else call.args[0]
         for call in fake_client.send.call_args_list
     )
 
@@ -241,3 +241,50 @@ def test_start_server_download_404(monkeypatch):
 
     assert b"404 NOT FOUND" in sent_raw
     assert b"Fichier non trouve" in sent_raw or b"Fichier non trouv" in sent_raw
+
+def test_start_server_stop(monkeypatch):
+    # --- Fake réseau ---
+    fake_net = MagicMock()
+    fake_net.ifconfig.return_value = ("192.168.4.1", "", "", "")
+
+    # --- Fake socket client ---
+    fake_client = MagicMock()
+    fake_client.recv.return_value = b"GET /stop HTTP/1.1"
+    fake_client.send = MagicMock()
+    fake_client.close = MagicMock()
+
+    # --- Fake server socket ---
+    fake_server = MagicMock()
+    fake_server.bind = MagicMock()
+    fake_server.listen = MagicMock()
+    fake_server.settimeout = MagicMock()
+
+    # 1 accept() -> stop après
+    fake_server.accept.side_effect = [
+        (fake_client, ("1.2.3.4", 1234)),
+        KeyboardInterrupt  # pour sortir de la boucle
+    ]
+
+    # --- Mock socket.socket + getaddrinfo ---
+    monkeypatch.setattr(network_setup.socket, "socket", lambda: fake_server)
+    monkeypatch.setattr(network_setup.socket, "getaddrinfo",
+                        lambda *args: [(None, None, None, None, ("0.0.0.0", 8080))])
+
+    # --- Lancer le serveur ---
+    network_setup.start_server(fake_net, "AP")
+
+    # --- Vérification de l'envoi HTTP ---
+    sent_raw = b"".join(
+        arg.encode() if isinstance(arg, str) else arg
+        for call in fake_client.send.call_args_list
+        for arg in call.args
+    )
+
+    assert b"HTTP/1.0 200 OK" in sent_raw
+    assert b"Serveur arr" in sent_raw  # éviter accents exacts
+
+    # --- Vérifie stop_server_flag activé ---
+    assert network_setup.stop_server_flag is True
+
+    # --- Vérifie fermeture du client ---
+    fake_client.close.assert_called_once()
