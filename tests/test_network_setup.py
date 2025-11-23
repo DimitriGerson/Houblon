@@ -288,3 +288,111 @@ def test_start_server_stop(monkeypatch):
 
     # --- Vérifie fermeture du client ---
     fake_client.close.assert_called_once()
+
+def test_start_server_restart(monkeypatch):
+    # --- Fake réseau ---
+    fake_net = MagicMock()
+    fake_net.ifconfig.return_value = ("192.168.4.1", "", "", "")
+
+    # --- Mock machine.reset() pour éviter un vrai reboot ---
+    mock_reset = MagicMock()
+    monkeypatch.setattr(network_setup.machine, "reset", mock_reset)
+
+    # --- Fake client socket ---
+    fake_client = MagicMock()
+    fake_client.recv.return_value = b"GET /restart HTTP/1.1"
+    fake_client.send = MagicMock()
+    fake_client.close = MagicMock()
+
+    # --- Fake server socket ---
+    fake_server = MagicMock()
+    fake_server.bind = MagicMock()
+    fake_server.listen = MagicMock()
+    fake_server.settimeout = MagicMock()
+
+    fake_server.accept.side_effect = [
+        (fake_client, ("1.2.3.4", 1234)),
+        KeyboardInterrupt    # pour éviter une boucle infinie
+    ]
+
+    # --- Mock socket.socket + getaddrinfo ---
+    monkeypatch.setattr(network_setup.socket, "socket", lambda: fake_server)
+    monkeypatch.setattr(network_setup.socket, "getaddrinfo",
+                        lambda *args: [(None, None, None, None, ("0.0.0.0", 8080))])
+
+    # --- Lancer le serveur  ---
+    network_setup.start_server(fake_net, "AP")
+
+    # --- Vérifier l'envoi HTTP ---
+    sent_raw = b"".join(
+        arg.encode() if isinstance(arg, str) else arg
+        for call in fake_client.send.call_args_list
+        for arg in call.args
+    )
+
+    assert b"HTTP/1.0 200 OK" in sent_raw
+    assert b"Red" in sent_raw  # pour éviter accents exacts
+
+    # --- Vérifier que reset a bien été appelé ---
+    mock_reset.assert_called_once()
+
+    # --- Vérifier que le client a bien été fermé ---
+    fake_client.close.assert_called_once()
+
+def test_start_server_download_500(monkeypatch):
+    # --- Fake réseau ---
+    fake_net = MagicMock()
+    fake_net.ifconfig.return_value = ("192.168.4.1", "", "", "")
+
+    # --- Fake liste de fichiers ---
+    monkeypatch.setattr(network_setup.os, "listdir", lambda: ["cfg.json"])
+
+    # --- Mock open() pour forcer une exception ---
+    def fake_open(*args, **kwargs):
+        raise IOError("Erreur lecture fichier")
+    monkeypatch.setattr(network_setup, "open", fake_open, raising=False)
+
+    # --- Fake client socket ---
+    fake_client = MagicMock()
+    fake_client.recv.return_value = b"GET /download?file=cfg.json HTTP/1.1"
+    fake_client.send = MagicMock()
+    fake_client.close = MagicMock()
+
+    # --- Fake serveur ---
+    fake_server = MagicMock()
+    fake_server.bind = MagicMock()
+    fake_server.listen = MagicMock()
+    fake_server.settimeout = MagicMock()
+    
+    calls = {"n":0}
+    def fake_accept():
+        calls["n"] +=1
+        if calls["n"] == 1:
+            return fake_client, ("1.2.3.4", 1234)
+
+        # Arrêter le serveur proprement après le 1er tour
+        network_setup.stop_server_flag = True
+        return fake_client, ("1.2.3.4", 1234)
+
+    fake_server.accept.side_effect = fake_accept
+
+    # --- Mock socket.socket() + getaddrinfo() ---
+    monkeypatch.setattr(network_setup.socket, "socket", lambda: fake_server)
+    monkeypatch.setattr(network_setup.socket, "getaddrinfo",
+                        lambda *args: [(None, None, None, None, ("0.0.0.0", 8080))])
+
+    # --- Exécution du serveur (il NE bloque plus) ---
+    network_setup.start_server(fake_net, "AP")
+
+    # --- Vérification que le serveur a renvoyé le 500 ---
+    sent_raw = b"".join(
+        arg.encode() if isinstance(arg, str) else arg
+        for call in fake_client.send.call_args_list
+        for arg in call.args
+    )
+
+    assert b"HTTP/1.0 500 ERROR" in sent_raw
+    assert b"Erreur lecture fichier" in sent_raw
+
+    # --- Vérifie que le client a été fermé ---
+    assert fake_client.close.call_count >=1 # au moins un appel

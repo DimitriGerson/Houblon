@@ -6,6 +6,10 @@ except ImportError:
     class MockMachine:
         Pin = object
 
+        @staticmethod
+        def reset():
+            print("Fake reset called")
+
     machine = MockMachine()
 
 
