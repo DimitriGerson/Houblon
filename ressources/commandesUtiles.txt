@@ -23,3 +23,9 @@ Pour les tests:
 -pour créer des fonction utiliser lambda ainsi la variable est bien une fonction et
 pas une variable
 -couvrir 80% des tests est raisonable au-dessus c'est beaucoup de temps.
+
+la commande pour lancer le rshell
+rshell --port /dev/ttyUSB0 --baud 115200 buffer-size 128 --editor nano
+
+pour connaitre les port où peuvent être connectés les ESP8266
+dmesg

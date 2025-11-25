@@ -1,0 +1,108 @@
+import ujson
+import time
+try:
+    import dht
+except ImportError:
+    dht = None
+
+class Techniques:
+    def __init__(self, config_file="config.json"):
+        # Charger les capteurs depuis le fichier JSON
+        try:
+            with open(config_file, "r") as f:
+                cfg = ujson.load(f)
+                self.sensors = cfg.get("sensors", [])
+        except (OSError, ValueError):
+            self.sensors = []
+
+        # dictionnaire de fonctions selon le type de capteur
+        self.methods = {
+            "analog": self.read_analog,
+            "digital": self.read_digital,
+            "DHT22": self.read_dht22
+        }
+
+    # =====================================================
+    # Abstraction pour machine (MicroPython)
+    # =====================================================
+    def get_machine(self):
+        """Retourne le module machine si dispo, sinon None"""
+        try:
+            import machine
+            return machine
+        except ImportError:
+            return None
+
+    # ==================== Méthodes des capteurs ====================
+
+    def read_analog(self, pin):
+        machine = self.get_machine()
+        if machine is None:
+            return 123 # Valeur simulée pour tests 
+
+        from machine import ADC, Pin
+        sensor = ADC(Pin(pin))
+        sensor.atten(ADC.ATTN_11DB)
+        sensor.width(ADC.WIDTH_12BIT)
+        return sensor.read()
+
+    def read_digital(self, pin):
+        machine = self.get_machine()
+        if machine is None:
+            return 0 # Valeur simulée pour tests
+
+        from machine import Pin
+        sensor = Pin(pin, Pin.IN)
+        return sensor.value()
+
+    def read_dht22(self, pin):
+        machine = self.get_machine()
+        if machine is None or dht is None:
+            return {"status": "error", "message": "machine non disponible"}
+
+        Pin = machine.Pin
+        sensor = dht.DHT22(Pin(pin))
+        try:
+            sensor.measure()
+            return {
+                "temperature": sensor.temperature(),
+                "humidity": sensor.humidity(),
+                "status": "ok"
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    # ==================== Lecture de capteurs ====================
+
+    def read_sensor(self, sensor):
+        """Appelle la fonction correspondante selon le type du capteur"""
+        func = self.methods.get(sensor["type"])
+        if func is None:
+            raise ValueError("Type de capteur inconnu: " + sensor["type"])
+        return func(sensor["pin"])
+
+    def read_all(self):
+        """Lit tous les capteurs définis dans la config"""
+        results = []
+        for s in self.sensors:
+            value = self.read_sensor(s)
+            results.append({"name": s["name"], "type": s["type"], "value": value})
+        return results
+
+    # ==================== Sauvegarde JSON ====================
+
+    def save_measure(self, data, filename="data.json"):
+        import json
+        try:
+            with open(filename, "r") as f:
+                existing = json.load(f)
+        except (OSError, ValueError):
+            existing = []
+
+        timestamp = time.time()
+        for sensor_data in data:
+            sensor_data["timestamp"] = timestamp
+            existing.append(sensor_data)
+
+        with open(filename, "w") as f:
+            json.dump(existing, f)
