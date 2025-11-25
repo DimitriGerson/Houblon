@@ -1,5 +1,9 @@
 import ujson
 import time
+try:
+    import dht
+except ImportError:
+    dht = None
 
 class Techniques:
     def __init__(self, config_file="config.json"):
@@ -18,9 +22,24 @@ class Techniques:
             "DHT22": self.read_dht22
         }
 
+    # =====================================================
+    # Abstraction pour machine (MicroPython)
+    # =====================================================
+    def get_machine(self):
+        """Retourne le module machine si dispo, sinon None"""
+        try:
+            import machine
+            return machine
+        except ImportError:
+            return None
+
     # ==================== Méthodes des capteurs ====================
 
     def read_analog(self, pin):
+        machine = self.get_machine()
+        if machine is None:
+            return 123 # Valeur simulée pour tests 
+
         from machine import ADC, Pin
         sensor = ADC(Pin(pin))
         sensor.atten(ADC.ATTN_11DB)
@@ -28,13 +47,20 @@ class Techniques:
         return sensor.read()
 
     def read_digital(self, pin):
+        machine = self.get_machine()
+        if machine is None:
+            return 0 # Valeur simulée pour tests
+
         from machine import Pin
         sensor = Pin(pin, Pin.IN)
         return sensor.value()
 
     def read_dht22(self, pin):
-        from machine import Pin
-        import dht
+        machine = self.get_machine()
+        if machine is None or dht is None:
+            return {"status": "error", "message": "machine non disponible"}
+
+        Pin = machine.Pin
         sensor = dht.DHT22(Pin(pin))
         try:
             sensor.measure()

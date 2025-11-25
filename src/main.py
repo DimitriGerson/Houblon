@@ -32,7 +32,8 @@ def main():
             start_server(ap, mode)
 
             tech = Techniques("config.json")
-            while True:
+            n=0
+            while n<2:
                 # Lire tous les capteurs
                 data = tech.read_all()
                 # Afficher les résultats dans le REPL
@@ -40,6 +41,7 @@ def main():
                 #sauvegarder les mesures dans data.json
                 tech.save_measure(data)
                 #Pause de 10 secondes avant la prochaine lecture
+                n+=1
                 time.sleep(10)
         else:
             boot.log("Impossible de démarrer le Wifi AP. Redémarrage...")

@@ -31,6 +31,9 @@ def test_main_mode_ap_ok(fake_boot, fake_wifi, fake_server, monkeypatch):
 
     fake_wifi.start_ap.return_value = MagicMock()
 
+    # Patch sleep pour que le test soit rapide
+    monkeypatch.setattr(main.time, "sleep", lambda x: None)
+
     main.main()
 
     fake_wifi.start_ap.assert_called_once()
