@@ -1,5 +1,18 @@
 # Wifi_utils.py
 # Fonction utilitaires Wi-Fi (AP / STA) 
+"""
+wifi_utils.py
+Fonctions utilitaires pour la gestion du Wi-Fi sur ESP (MicroPython).
+
+Rôle :
+- Activer ou désactiver les modes Wi-Fi (AP ou STA).
+- Démarrer un point d'accès (AP).
+- Connecter l'ESP à un réseau existant (STA).
+- Fournir un mode simulation pour tests sur PC.
+
+Utilisation :
+Importé par main.py pour configurer le réseau selon config.json.
+"""
 import time
 import boot
 
@@ -12,14 +25,31 @@ except ImportError:
     _ESP_MODE = False
 
 def disable_all_wifi():
-    """Désactive tous les modes Wi-Fi actifs."""
+    """
+    Désactive tous les modes Wi-Fi actifs (AP et STA).
+
+    Cette fonction est appelée avant de changer de mode
+    pour éviter les conflits entre interfaces.
+    """
     for iface in [network.WLAN(network.STA_IF), network.WLAN(network.AP_IF)]:
         if iface.active():
             iface.active(False)
     boot.log("Tous les modes Wi-Fi désactivés.")
 
 def start_ap(cfg):
-    """Démarre le point d'accès Wi-Fi."""
+    """
+    Démarre le point d'accès Wi-Fi (mode AP).
+
+    Args:
+        cfg (dict): Configuration du point d'accès avec clés :
+            - ssid (str): Nom du réseau AP.
+            - password (str): Mot de passe.
+            - channel (int): Canal Wi-Fi (par défaut 6).
+            - hidden (bool): Réseau caché ou non.
+
+    Returns:
+        network.WLAN: Objet AP actif si succès, sinon None.
+    """
     disable_all_wifi()
     ap = network.WLAN(network.AP_IF)
     ap.active(True)
@@ -37,8 +67,19 @@ def start_ap(cfg):
         time.sleep(0.5)
     boot.log("Echec de l'activation du point d'accès.")
     return None
-def start_sta(cfg):
-    """Connecte en mode Station à un réseau existant."""
+    
+def start_sta(cfg): 
+    """
+    Connecte l'ESP en mode Station (STA) à un réseau existant.
+
+    Args:
+        cfg (dict): Configuration STA avec clés :
+            - ssid (str): Nom du réseau Wi-Fi.
+            - password (str): Mot de passe.
+
+    Returns:
+        network.WLAN: Objet STA connecté si succès, sinon None.
+    """
     disable_all_wifi()
     sta = network.WLAN(network.STA_IF)
     sta.active(True)
