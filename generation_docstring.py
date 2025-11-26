@@ -1,13 +1,13 @@
-
+# generation_docstring.py
 import ast
 import os
+import sys
 
 def extract_docstrings(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         tree = ast.parse(f.read())
     
     doc = []
-    # Docstring du module
     if ast.get_docstring(tree):
         doc.append(f"# Documentation pour {file_path}\n")
         doc.append(ast.get_docstring(tree) + "\n")
@@ -20,10 +20,17 @@ def extract_docstrings(file_path):
     
     return "\n".join(doc)
 
-# Exemple d'utilisation
-file = "boot.py"
-markdown_doc = extract_docstrings(file)
 
-with open("DOC_BOOT.md", "w", encoding="utf-8") as out:
-    out.write(markdown_doc)
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("❌ Usage : python generation_docstring.py <fichier.py>")
+        sys.exit(1)
 
+    file = sys.argv[1]
+    output = f"DOC_{os.path.basename(file).replace('.py', '')}.md"
+    markdown_doc = extract_docstrings(file)
+
+    with open(output, "w", encoding="utf-8") as out:
+        out.write(markdown_doc)
+
+    print(f"📄 Documentation générée : {output}")
