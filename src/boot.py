@@ -1,6 +1,14 @@
 #boot.py
 #initialisation minimal + gestion des logs + chargement config
 
+"""
+boot.py
+Initialisation minimale pour l'ESP (MicroPython).
+- Gestion des logs
+- Chargement de la configuration avec fallback
+- Préparation avant main.py
+"""
+
 import time, os, json
 
 try:
@@ -13,7 +21,12 @@ LOG_FILE = "boot.log"
 CONFIG_FILE = "config.json"
 
 def log(msg):
-    """Affiche et écrit un message dans boot.log."""
+    """
+    Écrit un message dans le log et l'affiche.
+    
+    Args:
+        msg (str): Message à enregistrer.
+    """
     t = ticks_ms() / 1000
     line = "[{:.2f}] ".format(t) + msg + "\n"
     print(line, end="")
@@ -25,7 +38,9 @@ def log(msg):
         print("Une erreur est survenue : " + str(e))
 
 def clear_old_log():
-    """Efface le log s'il dépasse 100 Ko."""
+    """
+    Supprime le fichier log s'il dépasse 100 Ko.
+    """
     try:
         if LOG_FILE in os.listdir() and os.stat(LOG_FILE)[6] > 100_000:
             os.remove(LOG_FILE)
@@ -33,8 +48,13 @@ def clear_old_log():
     except:
         pass
         
-def load_config():
-    """Charge la configyration réseau depuis config.json."""
+def load_config(): 
+    """
+    Charge la configuration depuis config.json.
+    
+    Returns:
+        dict: Configuration complète ou valeurs par défaut (fallback).
+    """
     try:
         with open(CONFIG_FILE) as f:
             cfg = json.load(f)
@@ -49,6 +69,11 @@ def load_config():
         }
 
 def main():
+    """
+    Point d'entrée du boot.
+    - Nettoie les logs
+    - Affiche un message de démarrage
+    """
     clear_old_log()
     log("=== Boot ESP32 ===")
     log("Boot terminé - main.py va prendre le relais...")
