@@ -75,3 +75,12 @@ J'ai ajouter git config --global credential.helper cache
 mais j'aurai du faire
 git config --global credential.helper 'cache --timeout=3600'
 Pour ajouter une issue à une branch il faut faire un commit qui inclue cette issue exemple Ajout de la procédure pour lier une issue #2
+
+26/11/2025
+J'ai fini la phase 3 qui était de réussir créer un serveur et récupéer des mesures avec les tests correspondant.
+Les tests sonar Qube sont passés je suis à plus de 80% mais je pense qu'il faudra que j'augmente un peu.
+
+Maintenant je voudrais avancer sur tout ce qui va me permettre de repprendre vitte le projet:
+-Documentation
+-utilisation où se trouve les fichier à modifier etc.
+-Je commmence par les docstring.
