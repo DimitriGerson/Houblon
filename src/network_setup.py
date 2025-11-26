@@ -1,3 +1,29 @@
+#src/network_setup.py
+#initialisation du server + creation des pages 
+#actuellement le telechargement ne fonctionne pas il faudra le modifier
+#penser a parametrer le html
+#cette ligne est dupliquée cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n".encode())
+
+"""
+network_setup.py
+Gestion du serveur web embarqué sur ESP (MicroPython).
+
+Rôle :
+- Démarrer un serveur HTTP simple pour l'ESP.
+- Fournir des pages HTML pour :
+    - Arrêter le serveur
+    - Redémarrer l'ESP
+    - Télécharger des fichiers JSON présents sur l'ESP
+- Afficher des informations réseau (IP, mode).
+
+Limitations :
+- Téléchargement des fichiers à améliorer (actuellement basique).
+- HTML statique, à paramétrer pour personnalisation.
+
+Utilisation :
+Appelé par main.py après configuration du réseau.
+"""
+
 import socket, os, time
 try:
     import machine
@@ -17,10 +43,36 @@ except ImportError:
 stop_server_flag = False
 
 def stop_server():
+    """
+    Arrête le serveur web en définissant le flag global.
+    """
     global stop_server_flag
     stop_server_flag = True
 
-def start_server(net, mode, port=8080):
+def start_server(net, mode, port=8080):    
+    """
+    Démarre un serveur HTTP minimaliste sur l'ESP.
+
+    Args:
+        net: Objet réseau (AP ou STA) configuré.
+        mode (str): Mode réseau ("AP" ou "STA").
+        port (int): Port d'écoute (par défaut 8080).
+
+    Fonctionnalités :
+    - Affiche l'IP et le mode.
+    - Gère les requêtes GET pour :
+        /stop      → Arrêter le serveur
+        /restart   → Redémarrer l'ESP
+        /download?file=xxx.json → Télécharger un fichier JSON
+    - Génère une page HTML avec :
+        - IP et mode
+        - Liste des fichiers JSON disponibles
+        - Boutons STOP et REDEMARRER
+
+    Boucle :
+    - Accepte les connexions jusqu'à ce que stop_server_flag soit True.
+    """
+
     global stop_server_flag
     stop_server_flag = False #Réinitialise à chaque lancement
 

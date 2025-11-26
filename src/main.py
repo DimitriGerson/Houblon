@@ -1,6 +1,32 @@
 # main.py
 # Choisit le mode réseau selon confg.json et lance le programme principal
 
+"""
+main.py
+Programme principal pour l'ESP32 sous MicroPython.
+
+Rôle :
+- Charger la configuration depuis config.json.
+- Choisir le mode réseau (AP ou STA) et initialiser le Wi-Fi.
+- Lancer le serveur web.
+- Lire les capteurs et sauvegarder les mesures.
+- Gérer les bascules et redémarrages en cas d'erreur.
+
+Fonctionnalités :
+- Mode AP : création d'un point d'accès et démarrage du serveur.
+- Mode STA : connexion au réseau Wi-Fi existant, sinon fallback en AP.
+- Lecture des capteurs via la classe Techniques.
+- Sauvegarde des mesures dans data.json.
+- Redémarrage sécurisé en cas d'échec critique.
+
+Utilisation :
+Exécuter ce fichier après boot.py. Il s'appuie sur :
+- boot.py pour la configuration et les logs.
+- wifi_utils.py pour la gestion Wi-Fi.
+- technique_sensors.py pour la lecture des capteurs.
+- network_setup.py pour le serveur web.
+"""
+
 import boot
 import wifi_utils
 import time
@@ -12,12 +38,24 @@ except ImportError:
 from network_setup import start_server
 from technique_sensors import Techniques
 import time
+
 def safe_restart():
+    """
+    Redémarre l'ESP32 après un délai de 5 secondes.
+    Utilisé en cas d'erreur critique.
+    """
     boot.log("Redémarrage de l'ESP32 dans 5 secondes...")
     time.sleep(5)
     machine.reset()
 
 def main():
+    """
+    Point d'entrée principal :
+    - Charge la configuration
+    - Sélectionne le mode réseau (AP ou STA)
+    - Lance le serveur web
+    - Gère la lecture des capteurs et la sauvegarde des données
+    """
     # === Chargement de la configuration ===
     cfg = boot.load_config()
     mode = cfg.get("mode","AP").upper()
