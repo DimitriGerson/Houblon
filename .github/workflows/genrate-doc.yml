@@ -37,7 +37,6 @@ jobs:
           cd wiki
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          
           git add DOC_PROJET.md
           git commit -m "📚 Initialisation du Wiki avec la documentation" || echo "Aucun changement"
           # Pas de git pull si le Wiki est vide
