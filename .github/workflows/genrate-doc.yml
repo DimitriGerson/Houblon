@@ -1,4 +1,7 @@
 
+permissions:
+  contents: write
+
 name: Génération Docstrings
 
 on:
