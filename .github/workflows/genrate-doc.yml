@@ -1,0 +1,44 @@
+
+name: Génération Docstrings
+
+on:
+  push:
+    paths:
+      - '**.py'   # Déclenchement si des fichiers Python changent
+  workflow_dispatch: # Lancement manuel possible
+
+jobs:
+  generate-doc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+
+      - name: Installer Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Générer la documentation complète
+        run: |
+          python scripts/generation_docstring.py
+
+      - name: Cloner le Wiki
+        run: |
+          git clone https://github.com/${{ github.repository }}.wiki.git wiki
+
+      - name: Copier la doc dans le Wiki
+        run: |
+          cp DOC_PROJET.md wiki/
+
+      - name: Commit & Push vers le Wiki
+        run: |
+          cd wiki
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "📚 Mise à jour automatique des docstrings"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
