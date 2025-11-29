@@ -65,25 +65,25 @@ def main():
     # === Démarrage selon le mode ===
     if mode == "AP":
         ap = wifi_utils.start_ap(cfg["ap"])
-        if ap:
-            boot.log("Point d'accès actif, lancement du server web...")
-            start_server(ap, mode)
-
-            tech = Techniques("config.json")
-            n=0
-            while n<2:
-                # Lire tous les capteurs
-                data = tech.read_all()
-                # Afficher les résultats dans le REPL
-                print(data)
-                #sauvegarder les mesures dans data.json
-                tech.save_measure(data)
-                #Pause de 10 secondes avant la prochaine lecture
-                n+=1
-                time.sleep(10)
-        else:
-            boot.log("Impossible de démarrer le Wifi AP. Redémarrage...")
+        
+        (lambda: (
+            boot.log("Point d'accès actif, lancement du serveur web..."),
+            start_server(ap, "AP")
+        ))() if ap else (lambda: (
+            boot.log("Impossible de démarrer le Wifi AP. Redémarrage..."),
             safe_restart()
+        ))()
+
+        tech = Techniques("config.json")
+        for _ in range(2):
+            # Lire tous les capteurs
+            data = tech.read_all()
+            # Afficher les résultats dans le REPL
+            print(data)
+            #sauvegarder les mesures dans data.json
+            tech.save_measure(data)
+            #Pause de 10 secondes avant la prochaine lecture
+            time.sleep(10)
 
     elif mode == "STA":
         sta = wifi_utils.start_sta(cfg["sta"])
