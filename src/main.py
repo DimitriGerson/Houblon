@@ -67,7 +67,7 @@ def main():
         ap = wifi_utils.start_ap(cfg["ap"])
         
         (lambda: (
-            boot.log("Point d'accès actif, lancement du serveur web..."),
+            boot.log("Point d'accès actif, lancement du server web..."),
             start_server(ap, "AP")
         ))() if ap else (lambda: (
             boot.log("Impossible de démarrer le Wifi AP. Redémarrage..."),
