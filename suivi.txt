@@ -84,3 +84,7 @@ Maintenant je voudrais avancer sur tout ce qui va me permettre de repprendre vit
 -Documentation
 -utilisation où se trouve les fichier à modifier etc.
 -Je commmence par les docstring.
+
+30/11/2025
+Les docstrings sont maintenant fonctionnel grace à une automatisation par yaml donc dès que je rajoute dans mon dossier un fichier python avec des docstrings il est ajouté à mon wiki dans une page une seule page pour la documentation. j'ai dû créer une variable dans git pour le yaml. 
+Maintenant je veux créer un bash pour automatiser la création du serveur mqtt puis envoyer des message dessus
