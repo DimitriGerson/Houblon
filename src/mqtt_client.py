@@ -2,7 +2,11 @@
 # Classe dédiée à l'envoi des données vers un serveur MQTT
 
 import time
-from umqtt.simple import MQTTClient  # Library MicroPython
+try:
+    from umqtt.simple import MQTTClient  # Library MicroPython
+except ImportError:
+    from unittest.mock import MagicMock
+    MQTTClient = MagicMock()
 
 class MQTTHandler:
     
