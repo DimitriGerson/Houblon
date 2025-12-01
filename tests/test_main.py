@@ -26,7 +26,8 @@ def fake_server(monkeypatch):
 def test_main_mode_ap_ok(fake_boot, fake_wifi, fake_server, monkeypatch):
     fake_boot.load_config.return_value = {
         "mode": "AP",
-        "ap": {"ssid": "test", "password": "1234"}
+        "ap": {"ssid": "test", "password": "1234"},
+        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
     }
 
     fake_wifi.start_ap.return_value = MagicMock()
@@ -43,7 +44,8 @@ def test_main_mode_ap_ok(fake_boot, fake_wifi, fake_server, monkeypatch):
 def test_main_mode_ap_fail(fake_boot, fake_wifi, fake_server, monkeypatch):
     fake_boot.load_config.return_value = {
         "mode": "AP",
-        "ap": {}
+        "ap": {},
+        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
     }
 
     fake_wifi.start_ap.return_value = None
@@ -56,7 +58,8 @@ def test_main_sta_ok(fake_boot, fake_wifi, fake_server):
     fake_boot.load_config.return_value = {
         "mode": "STA",
         "sta": {},
-        "ap": {}
+        "ap": {},
+        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
     }
 
     fake_wifi.start_sta.return_value = MagicMock()
@@ -71,7 +74,8 @@ def test_main_sta_fail_fallback(fake_boot, fake_wifi, fake_server):
     fake_boot.load_config.return_value = {
         "mode": "STA",
         "sta": {},
-        "ap": {}
+        "ap": {},
+        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
     }
 
     fake_wifi.start_sta.return_value = None
@@ -87,7 +91,8 @@ def test_main_sta_fail_and_ap_fail(fake_boot, fake_wifi):
     fake_boot.load_config.return_value = {
         "mode": "STA",
         "sta": {},
-        "ap": {}
+        "ap": {},
+        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
     }
 
     fake_wifi.start_sta.return_value = None
@@ -116,7 +121,8 @@ def test_main_unknown_mode(fake_boot, fake_wifi, fake_server, monkeypatch):
     fake_boot.load_config.return_value = {
         "mode": "UNKNOWN_MODE",
         "ap": {},
-        "sta": {}
+        "sta": {},
+        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
     }
 
     # On mock safe_restart pour ne pas reset la machine
