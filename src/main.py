@@ -87,9 +87,6 @@ def main():
             print(data)
             #sauvegarder les mesures dans data.json
             tech.save_measure(data)
-            
-            for item in data:
-                mqtt.client.publish(mqtt.topic + "/" + item["name"], str(item["value"]))
             #Pause de 10 secondes avant la prochaine lecture
             time.sleep(10)
 
@@ -117,7 +114,10 @@ def main():
                 tech.save_measure(data)
                 
                 for item in data:
-                    mqtt.client.publish(mqtt.topic + "/" + item["name"], str(item["value"]))
+                    if mqtt.cleint.is_connected():
+                        mqtt.client.publish(mqtt.topic + "/" + item["name"], str(item["value"]))
+                    else:
+                        boot.log("MQTT non connecté")
                 #Pause de 10 secondes avant la prochaine lecture
                 time.sleep(10)
             
