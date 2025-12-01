@@ -87,9 +87,12 @@ def main():
             print(data)
             #sauvegarder les mesures dans data.json
             tech.save_measure(data)
+            
+            for item in data:
+                mqtt.client.publish(mqtt.topic + "/" + item["name"], str(item["value"]))
             #Pause de 10 secondes avant la prochaine lecture
             time.sleep(10)
-        mqtt.disconnect()
+
 
     elif mode == "STA":
         sta = wifi_utils.start_sta(cfg["sta"])
@@ -104,9 +107,24 @@ def main():
             boot.log("Connexion STA réussie.")
             boot.log("Lancement du serveur web...")
             start_server(sta, "STA") # ici aussi, lancement du serveur
+            tech = Techniques("config.json")
+            for _ in range(2):
+                # Lire tous les capteurs
+                data = tech.read_all()
+                # Afficher les résultats dans le REPL
+                print(data)
+                #sauvegarder les mesures dans data.json
+                tech.save_measure(data)
+                
+                for item in data:
+                    mqtt.client.publish(mqtt.topic + "/" + item["name"], str(item["value"]))
+                #Pause de 10 secondes avant la prochaine lecture
+                time.sleep(10)
+            
     else:
         boot.log("Mode inconnu : " + mode)
         safe_restart()
+    mqtt.disconnect()
 
 if __name__ == "__main__":
     main()
