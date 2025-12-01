@@ -38,6 +38,7 @@ except ImportError:
 from network_setup import start_server
 from technique_sensors import Techniques
 import time
+from mqtt_client import MQTTHandler 
 
 def safe_restart():
     """
@@ -60,6 +61,10 @@ def main():
     cfg = boot.load_config()
     mode = cfg.get("mode","AP").upper()
 
+    # Initialisation MQTT
+    mqtt = MQTTHandler(cfg["mqtt"])
+    mqtt.connect()  # Connexion
+    
     boot.log("Démarrage en mode : " + mode )
 
     # === Démarrage selon le mode ===
@@ -84,6 +89,7 @@ def main():
             tech.save_measure(data)
             #Pause de 10 secondes avant la prochaine lecture
             time.sleep(10)
+        mqtt.disconnect()
 
     elif mode == "STA":
         sta = wifi_utils.start_sta(cfg["sta"])
