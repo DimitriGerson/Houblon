@@ -93,6 +93,11 @@ class MQTTHandler:
             print("Erreur envoi MQTT :", e)
 
     def disconnect(self):
+        """
+        Ferme la connexion avec le serveur MQTT.
+
+        Cette méthode ignore les exceptions pour éviter les plantages.
+        """
         try:
             self.client.disconnect()
         except:
