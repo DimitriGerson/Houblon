@@ -114,7 +114,7 @@ def main():
                 tech.save_measure(data)
                 
                 for item in data:
-                    if mqtt.cleint.is_connected():
+                    if mqtt.client.is_connected():
                         mqtt.client.publish(mqtt.topic + "/" + item["name"], str(item["value"]))
                     else:
                         boot.log("MQTT non connecté")
