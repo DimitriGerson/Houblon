@@ -27,7 +27,11 @@ def test_main_mode_ap_ok(fake_boot, fake_wifi, fake_server, monkeypatch):
     fake_boot.load_config.return_value = {
         "mode": "AP",
         "ap": {"ssid": "test", "password": "1234"},
-        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
+        "mqtt": {
+            "server": "192.168.1.20",
+            "port": 1883,
+            "client_id": "ESP8266_01",
+            "topic": "mesures/capteurs"} 
     }
 
     fake_wifi.start_ap.return_value = MagicMock()
@@ -45,7 +49,11 @@ def test_main_mode_ap_fail(fake_boot, fake_wifi, fake_server, monkeypatch):
     fake_boot.load_config.return_value = {
         "mode": "AP",
         "ap": {},
-        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
+        "mqtt":{
+            "server": "192.168.1.20",
+            "port": 1883,
+            "client_id": "ESP8266_01",
+            "topic": "mesures/capteurs"} 
     }
 
     fake_wifi.start_ap.return_value = None
@@ -59,7 +67,11 @@ def test_main_sta_ok(fake_boot, fake_wifi, fake_server):
         "mode": "STA",
         "sta": {},
         "ap": {},
-        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
+        "mqtt": {
+            "server": "192.168.1.20",
+            "port": 1883,
+            "client_id": "ESP8266_01",
+            "topic": "mesures/capteurs"}  
     }
 
     fake_wifi.start_sta.return_value = MagicMock()
@@ -75,7 +87,11 @@ def test_main_sta_fail_fallback(fake_boot, fake_wifi, fake_server):
         "mode": "STA",
         "sta": {},
         "ap": {},
-        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
+        "mqtt": {
+            "server": "192.168.1.20",
+            "port": 1883,
+            "client_id": "ESP8266_01",
+            "topic": "mesures/capteurs"} 
     }
 
     fake_wifi.start_sta.return_value = None
@@ -92,7 +108,11 @@ def test_main_sta_fail_and_ap_fail(fake_boot, fake_wifi):
         "mode": "STA",
         "sta": {},
         "ap": {},
-        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
+        "mqtt":{
+            "server": "192.168.1.20",
+            "port": 1883,
+            "client_id": "ESP8266_01",
+            "topic": "mesures/capteurs"} 
     }
 
     fake_wifi.start_sta.return_value = None
@@ -122,7 +142,11 @@ def test_main_unknown_mode(fake_boot, fake_wifi, fake_server, monkeypatch):
         "mode": "UNKNOWN_MODE",
         "ap": {},
         "sta": {},
-        "mqtt": {"host": "x", "port": 1883, "topic": "test"} 
+        "mqtt": {
+            "server": "192.168.1.20",
+            "port": 1883,
+            "client_id": "ESP8266_01",
+            "topic": "mesures/capteurs"} 
     }
 
     # On mock safe_restart pour ne pas reset la machine
