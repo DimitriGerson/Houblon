@@ -52,7 +52,7 @@ def generate_full_doc(root_dir="."):
                 # Génération de l'ancre GitHub (basée sur le titre)
                 anchor = f"fichier-{file}".lower().replace("_", "").replace(".", "")
                 # Sommaire cliquable
-                all_docs.append(f"- #{anchor}")
+                all_docs.append(f"- # {anchor}")
                 content = extract_docstrings(path)
                 details.append(f"{section_title}\n\n{content}\n")
 
