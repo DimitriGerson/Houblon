@@ -29,7 +29,9 @@ def generate_full_doc(root_dir="."):
             if file.endswith(".py") and "generation_docstring" not in file:
                 path = os.path.join(root, file)
                 section_title = f"## Fichier: {file}"
+                # Génération de l'ancre GitHub (basée sur le titre)
                 anchor = section_title.lower().replace(" ", "-").replace(":", "")
+                # Sommaire cliquable
                 all_docs.append(f"- #{anchor}")
                 content = extract_docstrings(path)
                 details.append(f"{section_title}\n\n{content}\n")
