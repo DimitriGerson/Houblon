@@ -1,0 +1,24 @@
+{
+  "mode": "STA",
+  "ap": {
+    "ssid": "ESP32_AP",
+    "password": "12345678",
+    "channel": 6,
+    "hidden": false
+  },
+  "sta": {
+    "ssid":"Freebox-75BD10",
+    "password": "pellexi@9-prostat3-indemnata-argutus3!"
+  },
+  "sensors":[
+    {"name": "temperature_humidite", "type":"DHT22", "pin":2}
+  ],
+  "mqtt": {
+    "broker": "192.168.1.159",
+    "port": 1883,
+    "username": "mqttuser",
+    "password": "dimgers",
+    "topic": "esp32/sensors"
+  }
+
+}
