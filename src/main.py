@@ -102,8 +102,8 @@ def main():
                 safe_restart()
         else:
             boot.log("Connexion STA réussie.")
-            boot.log("Lancement du serveur web...")
-            start_server(sta, "STA") # ici aussi, lancement du serveur
+            #boot.log("Lancement du serveur web...")
+            #start_server(sta, "STA") # ici aussi, lancement du serveur
             tech = Techniques("config.json")
             for _ in range(2):
                 # Lire tous les capteurs
