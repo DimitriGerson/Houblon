@@ -14,11 +14,11 @@
     {"name": "temperature_humidite", "type":"DHT22", "pin":2}
   ],
   "mqtt": {
-    "broker": "192.168.1.159",
+    "server": "192.168.1.159",
     "port": 1883,
-    "username": "mqttuser",
-    "password": "dimgers",
-    "topic": "esp32/sensors"
+    "client_id": "ESPtest",
+    "user": "mqttuser",
+    "topic": "maison/etage/chambre1/",
+    "password":"dimgers"
   }
-
 }

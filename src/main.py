@@ -114,9 +114,21 @@ def main():
                 tech.save_measure(data)
                 
                 for item in data:
-                    if mqtt.client.is_connected():
-                        mqtt.client.publish(mqtt.topic + "/" + item["name"], str(item["value"]))
-                    else:
+                    #if mqtt.client.is_connected():
+                    capteur = item["name"]
+                    type_capteur = item["type"]
+                    valeur = item["value"]
+                    try:
+                        mqtt.connect() 
+                        time.sleep(2)
+                        for cle, val in valeur.items():
+                            # génération du topic générique
+                            topic = mqtt.topic + cle
+                            mqtt.client.publish(topic, str(val))
+                        mqtt.disconnect()
+                    #else: 
+                    except Exception as e:
+                        print("MQTT : publish impossible :",e)
                         boot.log("MQTT non connecté")
                 #Pause de 10 secondes avant la prochaine lecture
                 time.sleep(10)
