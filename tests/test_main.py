@@ -71,7 +71,8 @@ def test_main_sta_ok(fake_boot, fake_wifi, fake_server):
             "server": "192.168.1.20",
             "port": 1883,
             "client_id": "ESP8266_01",
-            "topic": "mesures/capteurs"}  
+            "user": "mqttuser",
+            "topic": "maison/etage/chambre1/"}  
     }
 
     fake_wifi.start_sta.return_value = MagicMock()
@@ -79,7 +80,7 @@ def test_main_sta_ok(fake_boot, fake_wifi, fake_server):
     main.main()
 
     fake_wifi.start_sta.assert_called_once()
-    fake_server.assert_called_once()
+    #fake_server.assert_called_once() actuellement j'ai enlevé le lancement du server
     fake_boot.log.assert_any_call("Connexion STA réussie.")
 
 def test_main_sta_fail_fallback(fake_boot, fake_wifi, fake_server):
