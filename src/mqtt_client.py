@@ -52,11 +52,15 @@ class MQTTHandler:
         self.port = config.get("port", 1883)
         self.client_id = config.get("client_id", "esp8266")
         self.topic = config.get("topic", "esp/data")
+        self.user = config.get("user", None)
+        self.password = config.get("password", None)
 
         self.client = MQTTClient(
             client_id=self.client_id,
             server=self.server,
-            port=self.port
+            port=self.port,
+            user=self.user,
+            password=self.password
         )
 
     def connect(self):

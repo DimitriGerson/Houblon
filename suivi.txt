@@ -92,3 +92,8 @@ Maintenant je veux créer un bash pour automatiser la création du serveur mqtt 
 2/12/2025
 Pour ouvrir le serveur sur le ESP8266 le plus simple et de rajouter un bouton quand je l'ouvre le serveur se lance quand je le ferme le serveur s'arrête.
 
+10/12/2025
+j'ai maintenant un serveur mqtt qui tourne sur mon raspberry j'envoie les données depuis esp8266
+en configurant le fichier config je peux publier sur mes différents topic humidite status temperature je pourrais rajouter ce que je veux.
+je peux maintenant placé un capteur dans chaque pièce et le configurer.
+Il faut maintenant envoyer les données sur la bdd et faire une interface grafana.
