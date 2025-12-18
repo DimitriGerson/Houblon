@@ -78,4 +78,5 @@ def main():
     log("=== Boot ESP32 ===")
     log("Boot terminé - main.py va prendre le relais...")
 
-main()
+if __name__ == "__main__":
+    main()

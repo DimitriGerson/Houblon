@@ -188,6 +188,7 @@ def mode_sta(cfg, mqtt):
         boot.log("Connexion STA échouée - bascule en AP")
         ap = wifi_utils.start_ap(cfg["ap"])
         if ap:
+            machine.reset() # on ne se met plus en AP si on arrive pas à se connecter en sta
             start_server(ap, "AP")
         else:
             safe_restart()
@@ -244,15 +245,20 @@ def main():
     """
     cfg = boot.load_config()
     mode = cfg.get("mode","AP").upper()
-    boot.log("Chargement du mode" + str(mode))
+    boot.log("Chargement du mode " + str(mode))
     mqtt = MQTTHandler(cfg["mqtt"])
     mqtt.connect()
     boot.log("Démarrage en mode : " + mode)
-
     # Choix du mode via dictionnaire, fallback vers inconnu
     mode_fn = MODE_FUNCTIONS.get(mode, mode_unknown)
-    mode_fn(cfg, mqtt)
-
+    try:
+        mode_fn(cfg, mqtt)
+    except Exception as e:
+        boot.log("Erreur : " + str(e))
+    finally:
+        time.sleep_ms(200)
+        boot.log(str(cfg["DEEP_SLEEP_MS"]))
+        machine.deepsleep(cfg["DEEP_SLEEP_MS"])
     #mqtt.disconnect()
 
 if __name__ == "__main__":
