@@ -46,17 +46,34 @@ Compatibilité MicroPython :
 Ce fichier constitue la boucle opérationnelle centrale du projet.
 """
 import boot
+import gc
+gc.collect()
+if hasattr(gc, "mem_free"):
+    print("RAM libre après boot:", gc.mem_free())
+else:
+    print("RAM libre après boot: non disponible (CPython)")
 import wifi_utils
+if hasattr(gc, "mem_free"):
+    print("RAM libre après wifi_utils:", gc.mem_free())
+gc.collect()
 import time
+if hasattr(gc, "mem_free"):
+    print("RAM libre après time:", gc.mem_free())
 try:
     import machine
 except ImportError:
     import types
-    machine = types.SimpleNamespace(reset=lambda: None)
-from network_setup import start_server
-from technique_sensors import Techniques
+    machine = types.SimpleNamespace(
+        reset=lambda: None,
+        deepsleep=lambda ms: None
+    )
+if hasattr(gc, "mem_free"):
+    print("RAM libre après machine:", gc.mem_free())
+gc.collect()
+if hasattr(gc, "mem_free"):
+    print("RAM libre avant MQTTHandler:", gc.mem_free())
 from mqtt_client import MQTTHandler
-
+gc.collect()
 def safe_restart():
     """
     Redémarrage sécurisé de l’ESP32.
@@ -103,6 +120,7 @@ def read_and_publish_sensors(mqtt, iterations=2):
         - Compatible MicroPython + mode test PC
         - Pensé pour fonctionner aussi bien en AP qu’en STA
     """
+    from technique_sensors import Techniques
     tech = Techniques("config.json")
     for _ in range(iterations):
         data = tech.read_all()
@@ -246,6 +264,8 @@ def main():
     cfg = boot.load_config()
     mode = cfg.get("mode","AP").upper()
     boot.log("Chargement du mode " + str(mode))
+    boot.log(str(cfg["mqtt"]))
+    from mqtt_client import MQTTHandler
     mqtt = MQTTHandler(cfg["mqtt"])
     mqtt.connect()
     boot.log("Démarrage en mode : " + mode)
@@ -256,7 +276,10 @@ def main():
     except Exception as e:
         boot.log("Erreur : " + str(e))
     finally:
-        time.sleep_ms(200)
+        try:
+            time.sleep_ms(200)
+        except AttributeError:
+            time.sleep(0.2)
         boot.log(str(cfg["DEEP_SLEEP_MS"]))
         machine.deepsleep(cfg["DEEP_SLEEP_MS"])
     #mqtt.disconnect()

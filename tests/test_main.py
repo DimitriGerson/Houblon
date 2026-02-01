@@ -16,14 +16,15 @@ def fake_wifi(monkeypatch):
     wifi = MagicMock()
     monkeypatch.setattr(main, "wifi_utils", wifi)
     return wifi
-
+"""
 @pytest.fixture
 def fake_server(monkeypatch):
     srv = MagicMock()
     monkeypatch.setattr(main, "start_server", srv)
     return srv
-
-def test_main_mode_ap_ok(fake_boot, fake_wifi, fake_server, monkeypatch):
+"""
+#def test_main_mode_ap_ok(fake_boot, fake_wifi, fake_server, monkeypatch):
+def test_main_mode_ap_ok(fake_boot, fake_wifi, monkeypatch):
     fake_boot.load_config.return_value = {
         "mode": "AP",
         "ap": {"ssid": "test", "password": "1234"},
@@ -31,7 +32,8 @@ def test_main_mode_ap_ok(fake_boot, fake_wifi, fake_server, monkeypatch):
             "server": "192.168.1.20",
             "port": 1883,
             "client_id": "ESP8266_01",
-            "topic": "mesures/capteurs"} 
+            "topic": "mesures/capteurs"},
+        "DEEP_SLEEP_MS": 0
     }
 
     fake_wifi.start_ap.return_value = MagicMock()
@@ -42,10 +44,11 @@ def test_main_mode_ap_ok(fake_boot, fake_wifi, fake_server, monkeypatch):
     main.main()
 
     fake_wifi.start_ap.assert_called_once()
-    fake_server.assert_called_once()
+    # fake_server.assert_called_once()
     fake_boot.log.assert_any_call("Point d'accès actif, lancement du server web...")
 
-def test_main_mode_ap_fail(fake_boot, fake_wifi, fake_server, monkeypatch):
+#def test_main_mode_ap_fail(fake_boot, fake_wifi, fake_server, monkeypatch):
+def test_main_mode_ap_fail(fake_boot, fake_wifi, monkeypatch):
     fake_boot.load_config.return_value = {
         "mode": "AP",
         "ap": {},
@@ -53,7 +56,8 @@ def test_main_mode_ap_fail(fake_boot, fake_wifi, fake_server, monkeypatch):
             "server": "192.168.1.20",
             "port": 1883,
             "client_id": "ESP8266_01",
-            "topic": "mesures/capteurs"} 
+            "topic": "mesures/capteurs"},
+        "DEEP_SLEEP_MS": 0 
     }
 
     fake_wifi.start_ap.return_value = None
@@ -62,7 +66,8 @@ def test_main_mode_ap_fail(fake_boot, fake_wifi, fake_server, monkeypatch):
         main.main()
         restart.assert_called_once()
 
-def test_main_sta_ok(fake_boot, fake_wifi, fake_server):
+#def test_main_sta_ok(fake_boot, fake_wifi, fake_server):
+def test_main_sta_ok(fake_boot, fake_wifi):
     fake_boot.load_config.return_value = {
         "mode": "STA",
         "sta": {},
@@ -72,7 +77,8 @@ def test_main_sta_ok(fake_boot, fake_wifi, fake_server):
             "port": 1883,
             "client_id": "ESP8266_01",
             "user": "mqttuser",
-            "topic": "maison/etage/chambre1/"}  
+            "topic": "maison/etage/chambre1/"},
+        "DEEP_SLEEP_MS": 0
     }
 
     fake_wifi.start_sta.return_value = MagicMock()
@@ -83,7 +89,8 @@ def test_main_sta_ok(fake_boot, fake_wifi, fake_server):
     #fake_server.assert_called_once() actuellement j'ai enlevé le lancement du server
     fake_boot.log.assert_any_call("Connexion STA réussie.")
 
-def test_main_sta_fail_fallback(fake_boot, fake_wifi, fake_server):
+#def test_main_sta_fail_fallback(fake_boot, fake_wifi, fake_server):
+def test_main_sta_fail_fallback(fake_boot, fake_wifi):
     fake_boot.load_config.return_value = {
         "mode": "STA",
         "sta": {},
@@ -92,7 +99,8 @@ def test_main_sta_fail_fallback(fake_boot, fake_wifi, fake_server):
             "server": "192.168.1.20",
             "port": 1883,
             "client_id": "ESP8266_01",
-            "topic": "mesures/capteurs"} 
+            "topic": "mesures/capteurs"},
+        "DEEP_SLEEP_MS": 0
     }
 
     fake_wifi.start_sta.return_value = None
@@ -101,7 +109,7 @@ def test_main_sta_fail_fallback(fake_boot, fake_wifi, fake_server):
     main.main()
 
     fake_wifi.start_ap.assert_called_once()
-    fake_server.assert_called_once()
+    #fake_server.assert_called_once()
     fake_boot.log.assert_any_call("Connexion STA échouée - bascule en AP")
 
 def test_main_sta_fail_and_ap_fail(fake_boot, fake_wifi):
@@ -113,7 +121,8 @@ def test_main_sta_fail_and_ap_fail(fake_boot, fake_wifi):
             "server": "192.168.1.20",
             "port": 1883,
             "client_id": "ESP8266_01",
-            "topic": "mesures/capteurs"} 
+            "topic": "mesures/capteurs"},
+        "DEEP_SLEEP_MS": 0
     }
 
     fake_wifi.start_sta.return_value = None
@@ -137,7 +146,8 @@ def test_safe_restart(monkeypatch):
     mock_log.assert_called_with("Redémarrage de l'ESP32 dans 5 secondes...")
     mock_reset.assert_called_once()
 
-def test_main_unknown_mode(fake_boot, fake_wifi, fake_server, monkeypatch):
+#def test_main_unknown_mode(fake_boot, fake_wifi, fake_server,  monkeypatch):
+def test_main_unknown_mode(fake_boot, fake_wifi, monkeypatch):
     # Configuration avec mode inexistant
     fake_boot.load_config.return_value = {
         "mode": "UNKNOWN_MODE",
@@ -147,7 +157,8 @@ def test_main_unknown_mode(fake_boot, fake_wifi, fake_server, monkeypatch):
             "server": "192.168.1.20",
             "port": 1883,
             "client_id": "ESP8266_01",
-            "topic": "mesures/capteurs"} 
+            "topic": "mesures/capteurs"},
+        "DEEP_SLEEP_MS": 0
     }
 
     # On mock safe_restart pour ne pas reset la machine
@@ -161,7 +172,7 @@ def test_main_unknown_mode(fake_boot, fake_wifi, fake_server, monkeypatch):
     restart.assert_called_once()
     
     # Vérifie qu'aucun serveur n'est démarré
-    fake_server.assert_not_called()
+    #fake_server.assert_not_called()
 
 def test_read_and_publish_sensors(monkeypatch):
     # Fake MQTTHandler
@@ -183,7 +194,7 @@ def test_read_and_publish_sensors(monkeypatch):
     mock_tech.read_all.return_value = fake_data
 
     # Patch Techniques() to return fake object
-    monkeypatch.setattr(main, "Techniques", lambda cfg: mock_tech)
+    monkeypatch.setattr("technique_sensors.Techniques", lambda cfg: mock_tech)
 
     # Patch sleep to avoid real delay
     monkeypatch.setattr(main.time, "sleep", lambda x: None)
