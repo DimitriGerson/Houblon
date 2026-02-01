@@ -97,3 +97,8 @@ j'ai maintenant un serveur mqtt qui tourne sur mon raspberry j'envoie les donné
 en configurant le fichier config je peux publier sur mes différents topic humidite status temperature je pourrais rajouter ce que je veux.
 je peux maintenant placé un capteur dans chaque pièce et le configurer.
 Il faut maintenant envoyer les données sur la bdd et faire une interface grafana.
+Le projet a évolué j'essaye déjà d'avoir plusieurs capteur sur un seul esp8266 et ce n'est pas aussi simple que prévu.
+en ayant plusieurs capteur je dois optimiser mon code en faisant attention au fuites mémoires
+Il faut compiler le code faire les appels aux bibliothèque juste qu'en on en a besoin et
+utiliser le gc et en fin il faudra que une fois que mes modules sont stables les compiler dans
+le main.

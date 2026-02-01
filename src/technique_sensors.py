@@ -24,13 +24,17 @@ try:
     import dht
 except ImportError:
     dht = None
+try:
+    import bme280
+except ImportError:
+    bme280 = None
 
-class Techniques:    
+class Techniques:
     """
     Classe pour gérer la lecture des capteurs et la sauvegarde des mesures.
     """
     def __init__(self, config_file="config.json"):
-        # Charger les capteurs depuis le fichier JSON        
+        # Charger les capteurs depuis le fichier JSON
         """
         Initialise la classe en chargeant la configuration des capteurs.
 
@@ -48,7 +52,8 @@ class Techniques:
         self.methods = {
             "analog": self.read_analog,
             "digital": self.read_digital,
-            "DHT22": self.read_dht22
+            "DHT22": self.read_dht22,
+            "BME280": self.read_bme280
         }
 
     # =====================================================
@@ -132,6 +137,37 @@ class Techniques:
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
+    def read_bme280(self, sensor_cfg):
+        """
+        Lit un capteur BME280 (température et pression).
+        Humidité toujours à 0 si le capteur est un BMP280.
+        """
+        machine = self.get_machine()
+        if machine is None or bme280 is None:
+            return {"status": "error", "message": "machine non disponible"}
+
+        from machine import Pin, I2C
+
+        try:
+            scl = sensor_cfg["i2c_scl"]
+            sda = sensor_cfg["i2c_sda"]
+        except KeyError:
+            return {
+                "status": "error", 
+                "message": "i2c_scl ou i2c_sda manquant"
+            }
+
+        i2c = I2C(scl=Pin(scl), sda=Pin(sda))
+        try:
+            sensor = bme280.BME280(i2c=i2c)
+            data = sensor.read_compensated_data() # renvoie array([temp, press, hum])
+            temp = data[0]
+            print("temperature : ", temp)
+            pres = data[1]
+            hum = data[2] if len(data) > 2 else 0.0
+            return {"temperature": temp, "pressure": pres, "humidity": hum, "status": "ok"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
     # ==================== Lecture de capteurs ====================
 
     def read_sensor(self, sensor):
@@ -144,9 +180,15 @@ class Techniques:
         Returns:
             Valeur lue par le capteur.
         """
+        # Normalisation du type
+        sensor_type = sensor.get("type","").strip().upper()
+
         func = self.methods.get(sensor["type"])
         if func is None:
             raise ValueError("Type de capteur inconnu: " + sensor["type"])
+        # Pour les cateurs I2C on passe le dictionnaire complet pas juste le pin.
+        if sensor_type == "BME280":
+            return func(sensor)
         return func(sensor["pin"])
 
     def read_all(self):

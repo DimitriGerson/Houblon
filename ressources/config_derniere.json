@@ -11,16 +11,14 @@
     "password": "pellexi@9-prostat3-indemnata-argutus3!"
   },
   "sensors":[
-    {"name": "temperature_humidite", "type":"DHT22", "pin":2},
-    {"name": "BME_temperature_pression", "type":"BME280", "i2c_scl": 5, "i2c_sda": 4}
+    {"name": "temperature_humidite", "type":"DHT22", "pin":2}
   ],
   "mqtt": {
     "server": "192.168.1.159",
     "port": 1883,
-    "client_id": "rdjsalon",
+    "client_id": "ESPtest",
     "user": "mqttuser",
-    "topic": "maison/rdj/grandsalon/",
+    "topic": "maison/etage/chambre1/",
     "password":"dimgers"
-  },
-  "DEEP_SLEEP_MS":15000
+  }
 }

@@ -17,9 +17,9 @@
   "mqtt": {
     "server": "192.168.1.159",
     "port": 1883,
-    "client_id": "rdjsalon",
+    "client_id": "ESPsalon",
     "user": "mqttuser",
-    "topic": "maison/rdj/grandsalon/",
+    "topic": "maison/rdj/GrandSalon/",
     "password":"dimgers"
   },
   "DEEP_SLEEP_MS":15000
